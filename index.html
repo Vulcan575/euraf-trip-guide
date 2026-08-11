@@ -88,10 +88,11 @@
     <h3>🗓️ 行程规划</h3>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       <label style="font-size:0.85rem;">出发日期 <input type="date" id="tripDateInput" style="padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);" onchange="setTripDate()"></label>
-      <label style="font-size:0.85rem;">每城停留 <select id="daysPerCitySel" style="padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);" onchange="setDaysPerCity()">
+      <label style="font-size:0.85rem;">默认每城停留 <select id="daysPerCitySel" style="padding:8px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);" onchange="setDaysPerCity()">
         <option value="1">1天</option><option value="2">2天</option><option value="3" selected>3天</option>
         <option value="4">4天</option><option value="5">5天</option>
       </select></label>
+      <span style="font-size:0.78rem;color:var(--text-light);">👇 列表里每座城市可单独改停留天数</span>
       <button class="btn" onclick="sortTrip()">🔀 按地理路线排序</button>
       <button class="btn btn-blue" onclick="shareTrip()">📤 分享行程</button>
     </div>

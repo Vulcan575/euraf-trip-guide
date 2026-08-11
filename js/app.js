@@ -48,6 +48,18 @@ let journeyCity = ls.get('journeyCity') || '';
 if(!selectedCities.includes(journeyCity)) journeyCity = '';
 let tripDate = ls.get('tripDate') || '';
 let daysPerCity = parseInt(ls.get('daysPerCity')) || 3;
+/* 每城独立停留天数：{城市名:天数}，未设置的城市用全局默认 daysPerCity */
+let cityDays = {};
+try{ cityDays = JSON.parse(ls.get('cityDays') || '{}'); }catch(e){ cityDays = {}; }
+function getDays(name){ return cityDays[name] || daysPerCity; }
+function totalDays(){ return selectedCities.reduce(function(s,n){ return s+getDays(n); },0); }
+function setCityDays(name, days){
+  if(!days || days<=0){ delete cityDays[name]; }
+  else{ cityDays[name] = days; }
+  ls.set('cityDays', JSON.stringify(cityDays));
+  renderTrip();
+  updateBudget();
+}
 
 /* ---------- 路线顺序（地理路线） ---------- */
 const regionOrder = ['出发地','中亚','高加索','土耳其','巴尔干','欧洲','北非','中东','东北亚','东非','南非','南亚','东南亚'];
@@ -308,7 +320,7 @@ function renderTrip(){
   }
   let totalBudget = 0;
   selectedCities.forEach(name=>totalBudget += cities[name].b);
-  const days = selectedCities.length*daysPerCity;
+  const days = totalDays();
   const countries = new Set(selectedCities.map(n=>cities[n].c).filter(c=>c!=='中国')).size;
   summary.innerHTML = '<h2>我的亚欧非环线</h2><div style="display:flex;justify-content:center;gap:24px;margin-top:12px;flex-wrap:wrap;">'
     +'<div style="text-align:center;"><div style="font-size:2rem;font-weight:700;">'+selectedCities.length+'</div><div style="font-size:0.85rem;opacity:0.9;">城市</div></div>'
@@ -319,9 +331,16 @@ function renderTrip(){
   selectedCities.forEach((name,i)=>{
     const city = cities[name];
     const visited = visitedCities.indexOf(name)>-1;
+    const days = getDays(name);
+    let daySel = '<select style="padding:3px 6px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:0.8rem;font-family:inherit;" onchange="setCityDays(\''+name+'\',parseInt(this.value))">';
+    for(let d=1; d<=10; d++){
+      daySel += '<option value="'+d+'"'+(d===days?' selected':'')+'>'+d+'天</option>';
+    }
+    daySel += '</select>';
     list.innerHTML += '<div style="display:flex;align-items:center;padding:12px;background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);'+(visited?'opacity:0.85;border-color:var(--secondary);':'')+'">'
       +'<div style="background:'+(visited?'var(--secondary)':'var(--primary)')+';color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:12px;flex-shrink:0;">'+(visited?'✓':(i+1))+'</div>'
-      +'<div style="flex:1;min-width:0;"><div style="font-weight:700;">'+name+'</div><div style="font-size:0.8rem;color:var(--text-light);">'+city.c+' · '+city.r+'</div></div>'
+      +'<div style="flex:1;min-width:0;"><div style="font-weight:700;">'+name+'</div><div style="font-size:0.8rem;color:var(--text-light);">'+city.c+' · '+city.r+'</div>'
+      +'<div style="margin-top:6px;display:flex;align-items:center;gap:4px;font-size:0.8rem;color:var(--text-light);">🕐 停留 '+daySel+(cityDays[name]?'<span style="font-size:0.7rem;background:var(--chip-hover);border-radius:999px;padding:1px 8px;">已单独设置</span>':'')+'</div></div>'
       +'<button class="visit-btn'+(visited?' visited':'')+'" onclick="toggleVisited(\''+name+'\')">'+(visited?'✅ 已打卡':'📍 打卡')+'</button>'
       +'<button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;padding:2px 4px;" onclick="moveCity('+i+',-1)" title="上移">↑</button>'
       +'<button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;padding:2px 4px;" onclick="moveCity('+i+',1)" title="下移">↓</button>'
@@ -344,7 +363,7 @@ function shareTrip(){
   const countries = [...new Set(selectedCities.map(n=>cities[n].c).filter(c=>c!=='中国'))].join('、');
   let text = '🌸 姐姐的亚欧非漫游指南\n'
     +'路线：'+selectedCities.map((n,i)=>(i+1)+'. '+n+'（'+cities[n].c+'）').join(' → ')+'\n'
-    +'共 '+selectedCities.length+' 城 · '+countries+' 国 · 每城约 '+daysPerCity+' 天';
+    +'共 '+selectedCities.length+' 城 · '+countries+' 国 · 全程约 '+totalDays()+' 天';
   if(tripDate) text += '\n出发：'+tripDate;
   if(visitedCities.length) text += '\n已打卡：'+visitedCities.join('、');
   text += '\n—— 来自 姐姐的亚欧非漫游指南 🌍';
@@ -389,10 +408,14 @@ function renderItinerary(){
     return;
   }
   const start = new Date(tripDate + 'T12:00:00');
+  let acc = 0;
   el.innerHTML = selectedCities.map((name,i)=>{
-    const d1 = new Date(start); d1.setDate(start.getDate()+i*daysPerCity);
-    const d2 = new Date(start); d2.setDate(start.getDate()+(i+1)*daysPerCity-1);
-    return '<div class="timeline-item"><div class="time" style="font-weight:700;color:var(--primary);">第'+(i*daysPerCity+1)+'-'+(i+1)*daysPerCity+'天 · '+fmtDate(d1)+' - '+fmtDate(d2)+'</div><div class="content"><strong>'+name+'</strong> <span style="color:var(--text-light);font-size:0.8rem;">'+cities[name].c+'</span></div></div>';
+    const d = getDays(name);
+    const d1 = new Date(start); d1.setDate(start.getDate()+acc);
+    const d2 = new Date(start); d2.setDate(start.getDate()+acc+d-1);
+    const dayLabel = '第'+(acc+1)+'-'+(acc+d)+'天';
+    acc += d;
+    return '<div class="timeline-item"><div class="time" style="font-weight:700;color:var(--primary);">'+dayLabel+' · '+fmtDate(d1)+' - '+fmtDate(d2)+'</div><div class="content"><strong>'+name+'</strong> <span style="color:var(--text-light);font-size:0.8rem;">'+cities[name].c+' · 停留'+d+'天</span></div></div>';
   }).join('');
 }
 function removeCity(name){
@@ -458,8 +481,8 @@ function updateBudget(){
     el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);"><p>选择城市后查看预算明细</p></div>';
     return;
   }
-  /* 基础预算 = 城市数 × 每城天数 × 日预算 */
-  const base = selectedCities.length*daysPerCity*val;
+  /* 基础预算 = Σ(每城天数) × 日预算 */
+  const base = totalDays()*val;
   /* 交通预算：按地理路线相邻段计算，最后一段回到出发地（环线） */
   const sorted = [...selectedCities].sort(byRoute);
   let transportTotal = 0;
@@ -480,17 +503,18 @@ function updateBudget(){
   const byRegion = {};
   selectedCities.forEach(name=>{
     const c = cities[name];
-    if(!byRegion[c.r]) byRegion[c.r] = {cities:0};
+    if(!byRegion[c.r]) byRegion[c.r] = {cities:0, days:0};
     byRegion[c.r].cities++;
+    byRegion[c.r].days += getDays(name);
   });
   let regionHTML = '';
   for(let r in byRegion){
-    regionHTML += '<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">'+r+'</td><td style="padding:8px;">'+byRegion[r].cities+'城</td><td style="padding:8px;text-align:right;">¥'+(byRegion[r].cities*val*daysPerCity)+'</td></tr>';
+    regionHTML += '<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">'+r+'</td><td style="padding:8px;">'+byRegion[r].cities+'城 · '+byRegion[r].days+'天</td><td style="padding:8px;text-align:right;">¥'+(byRegion[r].days*val)+'</td></tr>';
   }
   el.innerHTML = '<div class="card"><h3>预算明细</h3>'
     +'<h4 style="margin:0 0 4px;">基础预算（食宿+市内交通）</h4>'
     +'<p style="font-size:1.2rem;margin:0 0 4px;">¥<strong style="color:var(--primary);">'+base+'</strong></p>'
-    +'<p style="font-size:0.8rem;color:var(--text-light);margin:0 0 16px;">'+selectedCities.length+'城 × '+daysPerCity+'天 × ¥'+val+'/天</p>'
+    +'<p style="font-size:0.8rem;color:var(--text-light);margin:0 0 16px;">全程 '+totalDays()+' 天 × ¥'+val+'/天（每城天数可单独调整）</p>'
     +'<h4 style="margin:0 0 4px;">城际交通（按路线估算）</h4>'
     +'<table style="width:100%;border-collapse:collapse;margin-bottom:4px;">'+transportRows.join('')
     +'<tr><td style="padding:8px;"><b>交通合计</b></td><td style="padding:8px;text-align:right;"><b style="color:var(--primary);">¥'+transportTotal+'</b></td></tr></table>'
@@ -515,8 +539,9 @@ function resetData(){
   ls.remove('journeyCity');
   ls.remove('tripDate');
   ls.remove('daysPerCity');
+  ls.remove('cityDays');
   selectedCities = []; checklists = JSON.parse(JSON.stringify(DEFAULT_CHECKLISTS));
-  visitedCities = []; journeyCity = ''; routeLocked = false; tripDate = ''; daysPerCity = 3;
+  visitedCities = []; journeyCity = ''; routeLocked = false; tripDate = ''; daysPerCity = 3; cityDays = {};
   document.getElementById('tripDateInput').value = '';
   document.getElementById('daysPerCitySel').value = '3';
   renderCities(); renderTrip(); renderGuide(); renderVisa(); renderChecklist(); updateBudget();
