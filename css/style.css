@@ -1,62 +1,109 @@
-/* ===== 姐姐的亚欧非漫游指南 · 样式 ===== */
+/* ===== 姐姐的亚欧非漫游指南 · 样式（紫色 × 浅蓝 · 风景主题） ===== */
 :root{
-  --bg:#faf7f2;--card:#fff;--primary:#e67e22;--secondary:#27ae60;--danger:#e74c3c;
-  --text:#2c3e50;--text-light:#8a8a95;--border:#e0d5c7;
-  --shadow:0 4px 20px rgba(0,0,0,0.08);--radius:16px;
-  --visited-bg:#e8f8f0;--chip-hover:#f5efe6;--header-grad:linear-gradient(135deg,#e67e22,#f39c12);
-  --sticky-bg:rgba(255,255,255,0.95);
+  --bg:#f5f2fc;--bg-grad:linear-gradient(180deg,#f5f2fc 0%,#e9f1fb 100%);
+  --card:#ffffff;--primary:#7c3aed;--primary-2:#a855f7;--secondary:#3b82f6;--secondary-2:#7dd3fc;
+  --danger:#ef4444;--text:#2d2a3d;--text-light:#8a86a0;--border:#e4ddf3;
+  --shadow:0 6px 24px rgba(124,58,237,0.10);--radius:16px;
+  --visited-bg:#e6f4ff;--chip-hover:#f3eeff;
+  --header-grad:linear-gradient(135deg,rgba(88,28,135,0.78),rgba(37,99,235,0.62));
+  --sticky-bg:rgba(255,255,255,0.92);
+  --hero-h:300px;
 }
 html[data-theme="dark"]{
-  --bg:#141420;--card:#1f1f33;--primary:#f39c12;--secondary:#34d37e;--danger:#ff6b6b;
-  --text:#e8e8f4;--text-light:#8f8fa8;--border:#33334d;
-  --shadow:0 4px 20px rgba(0,0,0,0.4);--visited-bg:#123024;--chip-hover:#2a2a44;
-  --header-grad:linear-gradient(135deg,#b45309,#f39c12);
-  --sticky-bg:rgba(31,31,51,0.95);
+  --bg:#151326;--bg-grad:linear-gradient(180deg,#151326 0%,#131b33 100%);
+  --card:#1e1b35;--primary:#a78bfa;--primary-2:#c4b5fd;--secondary:#60a5fa;--secondary-2:#38bdf8;
+  --danger:#f87171;--text:#e8e6f5;--text-light:#9a94b8;--border:#322e52;
+  --shadow:0 6px 24px rgba(0,0,0,0.4);
+  --visited-bg:#123050;--chip-hover:#2a2645;
+  --header-grad:linear-gradient(135deg,rgba(46,16,101,0.85),rgba(23,37,84,0.7));
+  --sticky-bg:rgba(30,27,53,0.94);
 }
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;margin:0;padding-bottom:76px;}
+*{box-sizing:border-box;}
+body{background:var(--bg);background-image:var(--bg-grad);background-attachment:fixed;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;margin:0;padding-bottom:76px;}
 .container{max-width:900px;margin:0 auto;padding:16px;}
-header{position:relative;text-align:center;padding:40px 20px;background:var(--header-grad);color:white;border-radius:var(--radius);margin-bottom:20px;}
+
+/* ---------- Hero 风景轮播 ---------- */
+.hero{position:relative;min-height:var(--hero-h);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow);}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.6s ease;transform:scale(1.05);}
+.hero-bg.show{opacity:1;transform:scale(1);}
+.hero::before{content:"";position:absolute;inset:0;background:var(--header-grad);z-index:1;}
+.hero-content{position:relative;z-index:2;min-height:var(--hero-h);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:white;padding:32px 20px;}
+.hero-content h1{margin:0 0 8px;font-size:1.9rem;text-shadow:0 2px 12px rgba(0,0,0,0.35);}
+.hero-content p{margin:0;font-size:0.95rem;opacity:0.95;text-shadow:0 1px 8px rgba(0,0,0,0.35);}
+#themeToggle{position:absolute;top:14px;right:14px;z-index:3;background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.35);border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:1.1rem;backdrop-filter:blur(4px);}
+
+/* ---------- Tabs ---------- */
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:16px;}
-.tab-btn{flex-shrink:0;padding:10px 18px;border:none;background:var(--card);border-radius:24px;cursor:pointer;font-size:0.9rem;font-weight:600;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.05);white-space:nowrap;border:1px solid var(--border);}
-.tab-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
-.filter-btn{padding:6px 14px;border:1px solid var(--border);background:var(--card);border-radius:20px;cursor:pointer;font-size:0.85rem;color:var(--text);}
-.filter-btn.active{background:var(--primary);color:white;border-color:var(--primary);font-weight:600;}
+.tab-btn{flex-shrink:0;padding:10px 18px;border:none;background:var(--card);border-radius:24px;cursor:pointer;font-size:0.9rem;font-weight:600;color:var(--text);box-shadow:var(--shadow);white-space:nowrap;border:1px solid var(--border);transition:all .2s;}
+.tab-btn:hover{border-color:var(--primary);color:var(--primary);}
+.tab-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:white;border-color:transparent;}
+
+/* ---------- 筛选按钮 ---------- */
+.filter-btn{padding:6px 14px;border:1px solid var(--border);background:var(--card);border-radius:20px;cursor:pointer;font-size:0.85rem;color:var(--text);transition:all .2s;}
+.filter-btn:hover{border-color:var(--secondary);color:var(--secondary);}
+.filter-btn.active{background:linear-gradient(135deg,var(--secondary),var(--secondary-2));color:white;border-color:transparent;font-weight:600;}
+
 .section{display:none;}.section.active{display:block;animation:fadeIn 0.3s;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 .card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border);}
+
+/* ---------- 区域标题（真实风景背景） ---------- */
+.region-title{font-size:1.15rem;font-weight:700;margin:18px 0 10px;padding:16px 18px;border-radius:14px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.55);background-size:cover;background-position:center;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.region-title::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(88,28,135,0.55),rgba(37,99,235,0.45));}
+.region-title span{position:relative;z-index:1;}
+.region-title[data-region="出发地"]{background-image:url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="中亚"]{background-image:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="高加索"]{background-image:url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="土耳其"]{background-image:url('https://images.unsplash.com/photo-1539635278303-d4002c07eae3?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="巴尔干"]{background-image:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="欧洲"]{background-image:url('https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="北非"]{background-image:url('https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="中东"]{background-image:url('https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1400&q=80&fm=jpg&fit=crop');}
+
+/* ---------- 城市网格 ---------- */
 .city-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
-.city-chip{padding:10px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;text-align:center;font-size:0.85rem;font-weight:600;}
-.city-chip:hover{background:var(--chip-hover);}
+.city-chip{padding:10px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;text-align:center;font-size:0.85rem;font-weight:600;transition:all .2s;}
+.city-chip:hover{background:var(--chip-hover);border-color:var(--primary-2);transform:translateY(-2px);box-shadow:var(--shadow);}
 .city-chip.selected{border-color:var(--secondary);background:var(--visited-bg);color:var(--secondary);}
+
+/* ---------- 标签 ---------- */
 .tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-right:6px;}
 .visa-free{background:#d4edda;color:#155724;}.visa-landing{background:#fff3cd;color:#856404;}
 .visa-evisa{background:#cce5ff;color:#004085;}.visa-schengen{background:#e2d4f0;color:#4a148c;}
 .visa-hard{background:#f8d7da;color:#721c24;}
-.trek-box{background:linear-gradient(135deg,#e8f8f0,#d4edda);border-radius:12px;padding:12px;margin:8px 0;border-left:4px solid var(--secondary);}
-.check-item{display:flex;align-items:center;padding:8px 12px;background:var(--card);border-radius:10px;margin-bottom:6px;border:1px solid var(--border);cursor:pointer;}
+.trek-box{background:linear-gradient(135deg,#e6f4ff,#dbeafe);border-radius:12px;padding:12px;margin:8px 0;border-left:4px solid var(--secondary);}
+.check-item{display:flex;align-items:center;padding:8px 12px;background:var(--card);border-radius:10px;margin-bottom:6px;border:1px solid var(--border);cursor:pointer;transition:background .15s;}
+.check-item:hover{background:var(--chip-hover);}
 .check-item.checked{opacity:0.6;text-decoration:line-through;background:var(--chip-hover);}
-.trip-summary{background:var(--header-grad);color:white;border-radius:var(--radius);padding:20px;margin-bottom:16px;text-align:center;}
-.timeline{position:relative;padding-left:24px;}.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--primary);}
+.trip-summary{background:var(--header-grad);color:white;border-radius:var(--radius);padding:20px;margin-bottom:16px;text-align:center;box-shadow:var(--shadow);}
+.timeline{position:relative;padding-left:24px;}.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--primary),var(--secondary));}
 .timeline-item{position:relative;margin-bottom:16px;padding-left:16px;}
 .timeline-item::before{content:"";position:absolute;left:-20px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid var(--card);}
 .sticky-bar{position:sticky;bottom:0;background:var(--sticky-bg);backdrop-filter:blur(10px);padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:center;z-index:100;}
+.btn{padding:10px 20px;border:none;border-radius:24px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:white;font-weight:600;cursor:pointer;font-size:0.9rem;box-shadow:var(--shadow);transition:filter .2s;}
+.btn:hover{filter:brightness(1.1);}
+.btn.small{padding:6px 12px;font-size:0.8rem;}
 .tips-table{width:100%;border-collapse:collapse;font-size:0.88rem;}
-.tips-table th{background:var(--primary);color:#fff;padding:10px;text-align:left;}
+.tips-table th{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:10px;text-align:left;}
 .tips-table td{padding:10px;border-bottom:1px solid var(--border);}
 .tips-table tr:hover td{background:var(--chip-hover);}
 .visit-btn{background:none;border:1px solid var(--border);border-radius:14px;padding:4px 10px;cursor:pointer;font-size:0.75rem;color:var(--text-light);flex-shrink:0;}
+.visit-btn:hover{border-color:var(--secondary);color:var(--secondary);}
 .visit-btn.visited{background:var(--visited-bg);color:var(--secondary);border-color:var(--secondary);font-weight:700;}
-.btn{padding:10px 20px;border:none;border-radius:24px;background:var(--primary);color:white;font-weight:600;cursor:pointer;font-size:0.9rem;}
 .visa-table{width:100%;border-collapse:collapse;}
-.visa-table th{background:var(--primary);color:#fff;padding:10px;text-align:left;}
+.visa-table th{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:10px;text-align:left;}
 .visa-table td{padding:10px;border-bottom:1px solid var(--border);}
+
 @media print{
   :root,html[data-theme="dark"]{
-    --bg:#fff;--card:#fff;--primary:#e67e22;--secondary:#27ae60;--danger:#e74c3c;
+    --bg:#fff;--card:#fff;--primary:#7c3aed;--secondary:#3b82f6;--danger:#ef4444;
     --text:#000;--text-light:#555;--border:#ccc;--shadow:none;
   }
-  .tabs,.sticky-bar,.filter-btns,.btn,#citySearch,#themeToggle,input,select,.visit-btn{display:none!important;}
+  .tabs,.sticky-bar,.filter-btns,.btn,#citySearch,#themeToggle,input,select,.visit-btn,.hero-bg{display:none!important;}
   .section{display:block!important;page-break-inside:avoid;}
   .card,.city-detail{box-shadow:none;border:1px solid #ccc;}
+  .hero{min-height:0;padding:10px;}
+  .hero::before{display:none;}
+  .region-title{color:#000;text-shadow:none;background:#eee!important;padding:8px;}
   body{background:#fff;color:#000;padding-bottom:0;}
 }

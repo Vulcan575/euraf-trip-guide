@@ -74,18 +74,30 @@ function renderCities(){
     list.innerHTML = '<div class="empty-state" style="text-align:center;padding:40px;color:var(--text-light);"><div style="font-size:3rem;">🔍</div><p>没有找到「'+currentSearch+'」相关城市</p></div>';
     return;
   }
+  /* 注意：全程只用 appendChild，禁止 innerHTML 混用 —— innerHTML 重建会让 onclick 丢失 */
+  const frag = document.createDocumentFragment();
   for(let region in regions){
-    list.innerHTML += '<div class="region-title" style="font-size:1.2rem;font-weight:700;margin:16px 0 8px;padding-left:8px;border-left:4px solid var(--primary);">'+region+'</div>';
+    const title = document.createElement('div');
+    title.className = 'region-title';
+    title.setAttribute('data-region', region);
+    const span = document.createElement('span');
+    span.textContent = region;
+    title.appendChild(span);
+    frag.appendChild(title);
     const grid = document.createElement('div'); grid.className = 'city-grid';
     regions[region].forEach(name=>{
       const chip = document.createElement('div');
       chip.className = 'city-chip'+(selectedCities.includes(name)?' selected':'');
-      chip.innerHTML = '<div>'+name+'</div><div style="font-size:0.7rem;color:var(--text-light);">'+cities[name].c+'</div>';
+      const cn = document.createElement('div'); cn.textContent = name;
+      const cc = document.createElement('div'); cc.textContent = cities[name].c;
+      cc.style.cssText = 'font-size:0.7rem;color:var(--text-light);';
+      chip.appendChild(cn); chip.appendChild(cc);
       chip.onclick = ()=>toggleCity(name);
       grid.appendChild(chip);
     });
-    list.appendChild(grid);
+    frag.appendChild(grid);
   }
+  list.appendChild(frag);
 }
 function filterRegion(region,btn){
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -511,6 +523,17 @@ function renderTips(){
   });
   html += '</div>';
   el.innerHTML = html;
+}
+
+/* ---------- Hero 背景轮播 ---------- */
+let heroIdx = 0;
+const heroLayers = document.querySelectorAll('.hero-bg');
+if(heroLayers.length>1){
+  setInterval(function(){
+    heroLayers[heroIdx].classList.remove('show');
+    heroIdx = (heroIdx+1)%heroLayers.length;
+    heroLayers[heroIdx].classList.add('show');
+  }, 5000);
 }
 
 /* ---------- 初始化 ---------- */
