@@ -67,6 +67,9 @@ function byRoute(a,b){ return regionOrder.indexOf(cities[a].r) - regionOrder.ind
 function fmtDate(d){ return (d.getMonth()+1)+'月'+d.getDate()+'日'; }
 
 /* ---------- Tab 切换 ---------- */
+/* 性能：视觉切换（高亮/显示 section）立即生效，内容渲染放 25ms 后执行，
+ * 避免大内容（攻略/行程/贴士）的 DOM 构建同步阻塞点击事件，切换始终跟手 */
+let tabRenderTimer = null;
 function switchTab(tab){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById(tab).classList.add('active');
@@ -74,19 +77,22 @@ function switchTab(tab){
   const tb = document.querySelector('.tab-btn[data-tab="'+tab+'"]');
   if(tb) tb.classList.add('active');
   currentTab = tab;
-  if(tab==='cities') renderCities();
-  if(tab==='guide') renderGuide();
-  if(tab==='visa') renderVisa();
-  if(tab==='trip') renderTrip();
-  if(tab==='checklist') renderChecklist();
-  if(tab==='budget') updateBudget();
-  if(tab==='tips') renderTips();
-  if(tab==='gear') renderGear();
-  if(tab==='map'){
-    /* 地图懒初始化：section 由 display:none 变为可见后需 invalidateSize 修正尺寸 */
-    initMap();
-    setTimeout(()=>{ if(mapReady){ mapObj.invalidateSize(); renderMap(); } }, 60);
-  }
+  clearTimeout(tabRenderTimer);
+  tabRenderTimer = setTimeout(function(){
+    if(tab==='cities') renderCities();
+    if(tab==='guide') renderGuide();
+    if(tab==='visa') renderVisa();
+    if(tab==='trip') renderTrip();
+    if(tab==='checklist') renderChecklist();
+    if(tab==='budget') updateBudget();
+    if(tab==='tips') renderTips();
+    if(tab==='gear') renderGear();
+    if(tab==='map'){
+      /* 地图懒初始化：此时 section 已可见，尺寸正确 */
+      initMap();
+      if(mapReady){ mapObj.invalidateSize(); renderMap(); }
+    }
+  }, 25);
 }
 
 /* ---------- 工具 ---------- */
@@ -123,7 +129,13 @@ function renderLockBar(){
 function unlockRoute(){ routeLocked = false; renderLockBar(); renderCities(); }
 function lockRoute(){ routeLocked = true; renderLockBar(); renderCities(); }
 
+let citiesRenderKey = '';
 function renderCities(){
+  /* 缓存：过滤/搜索/选中/锁定状态都没变时，切回本 tab 不重建列表 */
+  const key = currentFilter+'|'+currentSearch+'|'+routeLocked+'|'+selectedCities.join(',');
+  const listEl = document.getElementById('cityList');
+  if(key===citiesRenderKey && listEl && listEl.children.length>0) return;
+  citiesRenderKey = key;
   renderLockBar();
   const list = document.getElementById('cityList');
   list.innerHTML = '';

@@ -19,7 +19,7 @@
   --visited-bg:#e9f3dc;             /* 嫩绿高亮 */
   --chip-hover:#f7efda;             /* 暖黄悬停 */
   --header-grad:linear-gradient(135deg,rgba(106,154,78,0.60),rgba(111,168,201,0.60));
-  --sticky-bg:rgba(255,253,246,0.92);
+  --sticky-bg:rgba(255,253,246,0.98);
   --cloud:#ffffff;
   --hero-h:320px;
 }
@@ -41,7 +41,7 @@ html[data-theme="dark"]{
   --visited-bg:#2c4557;
   --chip-hover:#26394a;
   --header-grad:linear-gradient(135deg,rgba(28,56,82,0.80),rgba(30,58,95,0.75));
-  --sticky-bg:rgba(31,49,64,0.94);
+  --sticky-bg:rgba(31,49,64,0.98);
   --cloud:#c9d6e2;
 }
 *{box-sizing:border-box;}
@@ -53,7 +53,6 @@ body{
     radial-gradient(ellipse 180px 55px at 55% 2%, rgba(255,255,255,0.45), transparent 70%),
     radial-gradient(ellipse 260px 75px at 30% 88%, rgba(255,255,255,0.40), transparent 70%),
     var(--bg-grad);
-  background-attachment:fixed;
   color:var(--text);
   font-family:"幼圆","YouYuan","Yuanti SC",-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   line-height:1.7;margin:0;padding-bottom:76px;
@@ -76,7 +75,7 @@ html[data-theme="dark"] body{
 /* ---------- Hero 风景轮播 · 水彩滤镜 + 白云 ---------- */
 .hero{position:relative;min-height:var(--hero-h);border-radius:26px;overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow);border:3px solid rgba(255,255,255,0.45);}
 /* 滤镜已移到图片 URL 参数（sat/bri），避免运行时 filter 导致全屏大图逐帧重算 */
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;visibility:hidden;transition:opacity 1.6s ease, visibility 1.6s;transform:scale(1.05);}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;visibility:hidden;transition:opacity 1s ease;transform:scale(1.05);}
 .hero-bg.show{opacity:1;visibility:visible;transform:scale(1);}
 .hero::before{content:"";position:absolute;inset:0;background:var(--header-grad);z-index:1;}
 .cloud{position:absolute;background:var(--cloud);border-radius:50%;opacity:0.8;z-index:2;animation:cloudDrift linear infinite;}
@@ -159,7 +158,7 @@ html[data-theme="dark"] body{
 .timeline{position:relative;padding-left:24px;}.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--primary),var(--secondary));}
 .timeline-item{position:relative;margin-bottom:16px;padding-left:16px;}
 .timeline-item::before{content:"";position:absolute;left:-20px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid var(--card);}
-.sticky-bar{position:sticky;bottom:0;background:var(--sticky-bg);backdrop-filter:blur(10px);padding:12px 16px;border-top:2px solid var(--border);display:flex;gap:8px;justify-content:center;z-index:100;}
+.sticky-bar{position:sticky;bottom:0;background:var(--sticky-bg);padding:12px 16px;border-top:2px solid var(--border);display:flex;gap:8px;justify-content:center;z-index:100;}
 .btn{padding:10px 20px;border:2px solid var(--ink);border-radius:999px;background:var(--card);color:var(--text);font-weight:700;cursor:pointer;font-size:0.9rem;box-shadow:0 4px 0 rgba(92,74,61,0.22);transition:all .2s;font-family:inherit;}
 .btn:hover{filter:brightness(1.05);transform:translateY(-2px);}
 .btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(92,74,61,0.22);}

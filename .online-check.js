@@ -7,7 +7,7 @@ function mkEl(id){
   const el = {
     id, value:'', style:{}, dataset:{}, innerHTML:'', textContent:'',
     className:'', checked:false, disabled:false,
-    classList:{add(){},remove(){},contains(){return false;},toggle(){}},
+    classList:{add(){},remove(){},contains(){return false;},toggle(){}}, children:[],
     addEventListener(){}, removeEventListener(){}, setAttribute(){}, appendChild(){}, removeChild(){},
     append(){}, querySelector(){return null;}, querySelectorAll(){return [];},
     getContext(){ return {fillRect(){},clearRect(){},getImageData(){return {data:[]};},putImageData(){},drawImage(){},save(){},restore(){},translate(){},scale(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},fill(){},arc(){},fillText(){},measureText(){return {width:0};},strokeRect(){}}; },
@@ -52,6 +52,8 @@ console.log('城市总数:', keys.length);
 // 15 新城市验证
 const check = ['阿姆斯特丹','柏林','马德里','里斯本','威尼斯','河内','胡志明市','蒲甘','博卡拉','新德里','内罗毕','开普敦','阿布扎比','德黑兰','撒马尔罕'];
 let allOk = true;
+const wait = (ms)=>new Promise(r=>setTimeout(r,ms));
+(async function main(){
 for(const name of check){
   const d = c[name];
   if(!d){ console.log('❌ 缺失城市:', name); allOk=false; continue; }
@@ -91,12 +93,13 @@ const fns = [
   ['map tab(无Leaflet降级)','switchTab(\'map\')'],
 ];
 for(const [label,expr] of fns){
-  try{ vm.runInContext(expr+';', sandbox); console.log('✅', label); }
+  try{ vm.runInContext(expr+';', sandbox); await wait(60); console.log('✅', label); }
   catch(e){ console.log('❌', label, e.message); allOk=false; }
 }
 // 攻略内容验证
 try{
   vm.runInContext('switchTab(\'cities\'); toggleCity(\'撒马尔罕\'); switchTab(\'guide\');', sandbox);
+  await wait(80);
   const g = sandbox.document.getElementById('guideContent').innerHTML;
   if(g.includes('雷吉斯坦') && g.includes('苏姆')) console.log('✅ 撒马尔罕攻略渲染（含门票信息）');
   else { console.log('❌ 攻略渲染缺失内容'); allOk=false; }
@@ -123,3 +126,4 @@ try{
 }catch(e){ console.log('❌ 坐标验证异常:', e.message); allOk=false; }
 
 console.log(allOk ? '\n=== 全部通过 ===' : '\n=== 存在失败项 ===');
+})().catch(e=>{ console.log('❌ 测试异常:', e); process.exit(1); });

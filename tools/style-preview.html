@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-style="ghibli">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>风格预览 · 姐姐的亚欧非漫游指南</title>
+<style>
+/* ============ 基底 ============ */
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;padding-bottom:60px;}
+.demo{max-width:900px;margin:0 auto;padding:16px;}
+#switcher{position:sticky;top:0;z-index:999;background:#111827cc;backdrop-filter:blur(8px);padding:10px 16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;color:#fff;font-size:.8rem;}
+#switcher button{padding:8px 16px;border-radius:999px;border:2px solid transparent;cursor:pointer;font-weight:700;font-size:.85rem;background:#1f2937;color:#e5e7eb;}
+#switcher button.active{border-color:#f59e0b;color:#fbbf24;}
+#switcher .sep{color:#6b7280;align-self:center;}
+
+/* ============ 组件模板（HTML 结构共用，样式随主题变） ============ */
+.demo-hero{position:relative;height:220px;border-radius:24px;overflow:hidden;margin-bottom:18px;background:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=75&fm=jpg&fit=crop&sat=-18&bri=5') center/cover;}
+.demo-hero::before{content:"";position:absolute;inset:0;}
+.demo-hero .t{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;z-index:2;}
+.demo-hero h1{font-size:1.9rem;letter-spacing:2px;}
+.demo-hero p{font-size:.9rem;opacity:.95;}
+.demo-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0;margin-bottom:16px;}
+.demo-tabs button{flex-shrink:0;padding:9px 18px;border-radius:999px;cursor:pointer;font-weight:700;font-size:.88rem;font-family:inherit;}
+.demo-tabs button.on{}
+.demo-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.demo-filter button{padding:5px 13px;border-radius:999px;cursor:pointer;font-size:.82rem;font-weight:700;font-family:inherit;}
+.demo-card{border-radius:18px;padding:18px;margin-bottom:14px;}
+.demo-card h3{margin-bottom:10px;}
+.demo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;}
+.demo-chip{padding:10px;border-radius:14px;text-align:center;font-size:.82rem;font-weight:700;cursor:pointer;}
+.demo-chip.sel{}
+.demo-chip small{display:block;font-weight:400;font-size:.7rem;margin-top:2px;opacity:.75;}
+.demo-rows{}
+.demo-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;margin-bottom:8px;font-size:.85rem;font-weight:700;}
+.demo-row .dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;flex-shrink:0;}
+.demo-row .sub{font-weight:400;font-size:.75rem;opacity:.75;}
+.demo-tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+.demo-tag{padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:700;}
+.demo-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.demo-btn{padding:9px 18px;border-radius:999px;cursor:pointer;font-weight:700;font-size:.85rem;font-family:inherit;}
+.demo-btn.primary{}
+.demo-btn.danger{}
+.demo-summary{border-radius:20px;padding:20px;text-align:center;margin-bottom:14px;}
+.demo-summary .nums{display:flex;justify-content:center;gap:24px;margin-top:10px;}
+.demo-summary .nums b{font-size:1.6rem;display:block;}
+.demo-note{margin-top:14px;font-size:.78rem;text-align:center;opacity:.7;}
+
+/* ================================================================
+   ⓐ 吉卜力手账风（现有）
+================================================================ */
+html[data-style="ghibli"]{
+  --bg:#faf6ec;--card:#fffdf6;--primary:#6a9a4e;--secondary:#6fa8c9;--danger:#d4704f;
+  --text:#4a4238;--text-light:#9c907f;--border:#e6dcc4;--ink:#5c4a3d;
+  --shadow:0 6px 20px rgba(190,140,66,0.16);--radius:20px;--visited:#e9f3dc;--hover:#f7efda;
+  --grad:linear-gradient(135deg,#6a9a4e,#6fa8c9);
+}
+html[data-style="ghibli"] body{background:var(--bg);color:var(--text);font-family:"幼圆","YouYuan","Yuanti SC",-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+html[data-style="ghibli"] .demo-hero{border:3px solid rgba(255,255,255,.45);box-shadow:var(--shadow);}
+html[data-style="ghibli"] .demo-hero::before{background:linear-gradient(135deg,rgba(106,154,78,.6),rgba(111,168,201,.6));}
+html[data-style="ghibli"] .demo-hero .t{color:#fff;}
+html[data-style="ghibli"] .demo-hero h1::after{content:"🌿";margin-left:6px;}
+html[data-style="ghibli"] .demo-tabs button{border:2px solid var(--ink);background:var(--card);color:var(--text);box-shadow:0 4px 0 rgba(92,74,61,.22);}
+html[data-style="ghibli"] .demo-tabs button.on{background:var(--grad);color:#fff;}
+html[data-style="ghibli"] .demo-filter button{border:2px solid var(--ink);background:var(--card);color:var(--text);box-shadow:0 2px 0 rgba(92,74,61,.18);}
+html[data-style="ghibli"] .demo-filter button.on{background:var(--grad);color:#fff;}
+html[data-style="ghibli"] .demo-card{background:var(--card);border:2px solid var(--border);box-shadow:var(--shadow);}
+html[data-style="ghibli"] .demo-chip{border:2px solid var(--border);background:var(--card);color:var(--text);}
+html[data-style="ghibli"] .demo-chip:hover{background:var(--hover);transform:translateY(-3px) rotate(-1deg);box-shadow:var(--shadow);}
+html[data-style="ghibli"] .demo-chip.sel{border-color:var(--primary);background:var(--visited);color:var(--primary);}
+html[data-style="ghibli"] .demo-row{border:2px solid var(--border);background:var(--card);}
+html[data-style="ghibli"] .demo-row .dot{background:var(--primary);}
+html[data-style="ghibli"] .demo-tag{background:#e8f3dc;color:#4d7a33;}
+html[data-style="ghibli"] .demo-btn{border:2px solid var(--ink);background:var(--card);color:var(--text);box-shadow:0 4px 0 rgba(92,74,61,.22);}
+html[data-style="ghibli"] .demo-btn.primary{background:var(--secondary);color:#fff;}
+html[data-style="ghibli"] .demo-btn.danger{background:var(--danger);color:#fff;}
+html[data-style="ghibli"] .demo-summary{background:var(--grad);color:#fff;border:3px solid rgba(255,255,255,.4);box-shadow:var(--shadow);}
+
+/* ================================================================
+   ⓑ 复古环球旅行海报风（Vintage Explorer）
+   羊皮纸 × 深海蓝 × 砖红 · 双线描边 · 衬线标题 · 邮戳印章感
+================================================================ */
+html[data-style="vintage"]{
+  --bg:#f3ead8;--card:#fbf6ea;--primary:#1d4d5e;--secondary:#b8502f;--danger:#8a2f1d;
+  --text:#2b2b24;--text-light:#8a7f6a;--border:#cbb98f;--ink:#1d4d5e;
+  --shadow:0 4px 14px rgba(90,70,30,.14);--radius:6px;--visited:#e3eef0;--hover:#efe6cf;
+  --grad:linear-gradient(135deg,#1d4d5e,#b8502f);
+}
+html[data-style="vintage"] body{background:var(--bg);color:var(--text);}
+html[data-style="vintage"] .demo-hero{border:6px double var(--ink);border-radius:2px;box-shadow:var(--shadow);}
+html[data-style="vintage"] .demo-hero::before{background:linear-gradient(160deg,rgba(29,77,94,.88),rgba(78,40,20,.72));}
+html[data-style="vintage"] .demo-hero .t{color:#f5e9d0;font-family:Georgia,"Times New Roman","Songti SC",serif;}
+html[data-style="vintage"] .demo-hero h1{font-size:2rem;letter-spacing:4px;font-weight:700;}
+html[data-style="vintage"] .demo-hero h1::before{content:"✈ ";font-size:1.2rem;}
+html[data-style="vintage"] .demo-hero p{letter-spacing:2px;font-size:.8rem;text-transform:uppercase;}
+html[data-style="vintage"] .demo-tabs button{border:2px solid var(--ink);background:transparent;color:var(--ink);font-family:Georgia,serif;letter-spacing:1px;}
+html[data-style="vintage"] .demo-tabs button.on{background:var(--ink);color:#f5e9d0;border-radius:0;}
+html[data-style="vintage"] .demo-filter button{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:0;font-family:Georgia,serif;}
+html[data-style="vintage"] .demo-filter button.on{background:var(--secondary);color:#fff;border-color:var(--secondary);}
+html[data-style="vintage"] .demo-card{background:var(--card);border:1px solid var(--border);border-radius:0;box-shadow:var(--shadow);position:relative;}
+html[data-style="vintage"] .demo-card h3{font-family:Georgia,serif;letter-spacing:1px;color:var(--ink);border-bottom:2px solid var(--secondary);padding-bottom:6px;display:inline-block;}
+html[data-style="vintage"] .demo-chip{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:0;}
+html[data-style="vintage"] .demo-chip:hover{background:var(--hover);border-color:var(--ink);}
+html[data-style="vintage"] .demo-chip.sel{border:2px solid var(--ink);background:var(--visited);color:var(--ink);border-style:dashed;}
+html[data-style="vintage"] .demo-row{border:1px solid var(--border);background:var(--card);border-radius:0;border-left:4px solid var(--secondary);}
+html[data-style="vintage"] .demo-row .dot{background:var(--ink);border-radius:0;font-family:Georgia,serif;}
+html[data-style="vintage"] .demo-tag{background:var(--card);color:var(--ink);border:1px solid var(--ink);border-radius:0;letter-spacing:.5px;}
+html[data-style="vintage"] .demo-btn{border:2px solid var(--ink);background:transparent;color:var(--ink);border-radius:0;font-family:Georgia,serif;letter-spacing:1px;}
+html[data-style="vintage"] .demo-btn.primary{background:var(--ink);color:#f5e9d0;}
+html[data-style="vintage"] .demo-btn.danger{background:var(--secondary);color:#fff;border-color:var(--secondary);}
+html[data-style="vintage"] .demo-summary{background:var(--ink);color:#f5e9d0;border:3px double var(--secondary);border-radius:2px;}
+html[data-style="vintage"] .demo-summary h3{font-family:Georgia,serif;letter-spacing:3px;}
+html[data-style="vintage"] .demo-note::before{content:"◎ ";color:var(--secondary);}
+
+/* ================================================================
+   ⓒ 现代极简杂志风（Editorial Minimal）
+   纯白 × 墨黑 × 一抹克莱因蓝 · 无边框 · 细分割线 · 大留白
+================================================================ */
+html[data-style="minimal"]{
+  --bg:#fafafa;--card:#ffffff;--primary:#12315e;--secondary:#1a56db;--danger:#d64545;
+  --text:#111111;--text-light:#8a8a8a;--border:#e5e5e5;--ink:#111;
+  --shadow:0 1px 2px rgba(0,0,0,.05);--radius:10px;--visited:#eef3ff;--hover:#f4f4f4;
+  --grad:linear-gradient(135deg,#12315e,#1a56db);
+}
+html[data-style="minimal"] body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+html[data-style="minimal"] .demo-hero{border-radius:12px;box-shadow:none;border:1px solid #111;}
+html[data-style="minimal"] .demo-hero::before{background:linear-gradient(180deg,rgba(18,49,94,.82),rgba(18,49,94,.35));}
+html[data-style="minimal"] .demo-hero .t{color:#fff;text-align:left;padding:0 32px;top:50%;}
+html[data-style="minimal"] .demo-hero h1{font-size:2.2rem;letter-spacing:-.5px;font-weight:800;}
+html[data-style="minimal"] .demo-hero h1::after{content:"";display:block;width:44px;height:4px;background:#fff;margin-top:12px;}
+html[data-style="minimal"] .demo-hero p{font-size:.85rem;opacity:.9;letter-spacing:1px;}
+html[data-style="minimal"] .demo-tabs{border-bottom:1px solid var(--border);padding-bottom:0;margin-bottom:18px;}
+html[data-style="minimal"] .demo-tabs button{border:none;background:none;color:var(--text-light);border-radius:0;padding:10px 4px;margin-right:18px;font-weight:600;font-size:.88rem;}
+html[data-style="minimal"] .demo-tabs button.on{color:var(--primary);box-shadow:inset 0 -3px 0 var(--secondary);}
+html[data-style="minimal"] .demo-filter button{border:1px solid var(--border);background:var(--card);color:var(--text-light);border-radius:999px;}
+html[data-style="minimal"] .demo-filter button.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+html[data-style="minimal"] .demo-card{background:var(--card);border:none;border-radius:0;border-top:1px solid var(--border);box-shadow:none;padding:18px 4px;}
+html[data-style="minimal"] .demo-card h3{font-weight:700;letter-spacing:-.3px;}
+html[data-style="minimal"] .demo-chip{border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px;}
+html[data-style="minimal"] .demo-chip:hover{border-color:var(--primary);transform:translateY(-1px);}
+html[data-style="minimal"] .demo-chip.sel{border:1.5px solid var(--primary);background:var(--visited);color:var(--primary);}
+html[data-style="minimal"] .demo-row{border:1px solid var(--border);background:var(--card);border-radius:10px;}
+html[data-style="minimal"] .demo-row .dot{background:var(--primary);border-radius:50%;}
+html[data-style="minimal"] .demo-tag{background:var(--bg);color:var(--text);border:1px solid var(--border);}
+html[data-style="minimal"] .demo-btn{border:none;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:999px;}
+html[data-style="minimal"] .demo-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+html[data-style="minimal"] .demo-btn.danger{background:#fff;color:var(--danger);border:1px solid var(--danger);}
+html[data-style="minimal"] .demo-summary{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:14px;}
+html[data-style="minimal"] .demo-summary h3{color:var(--primary);}
+html[data-style="minimal"] .demo-summary .nums b{color:var(--primary);}
+</style>
+</head>
+<body>
+
+<div id="switcher">
+  <span style="align-self:center;font-weight:700;">🎨 风格切换：</span>
+  <button data-s="ghibli" class="active">ⓐ 吉卜力手账（现有）</button>
+  <button data-s="vintage">ⓑ 复古环球海报</button>
+  <button data-s="minimal">ⓒ 极简杂志</button>
+  <span class="sep">|</span>
+  <span style="align-self:center;">↓ 以下为真实组件的模拟效果</span>
+</div>
+
+<div class="demo">
+  <!-- Hero -->
+  <div class="demo-hero">
+    <div class="t">
+      <h1>姐姐的亚欧非漫游指南</h1>
+      <p>从新疆出发，穿越中亚、高加索、土耳其、巴尔干、欧洲、北非、中东</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="demo-tabs">
+    <button class="on">选城市</button><button>清单栏</button><button>城市攻略</button>
+    <button>签证助手</button><button>我的行程</button><button>预算规划</button>
+    <button>行前贴士</button><button>🎒 装备</button><button>🗺️ 路线地图</button>
+  </div>
+
+  <!-- 筛选 -->
+  <div class="demo-filter">
+    <button class="on">全部</button><button>中亚</button><button>高加索</button>
+    <button>土耳其</button><button>欧洲</button><button>北非</button><button>中东</button>
+  </div>
+
+  <!-- 城市网格 -->
+  <div class="demo-card">
+    <h3>🏙️ 城市 · 欧洲区预览</h3>
+    <div class="demo-grid">
+      <div class="demo-chip sel">巴黎<small>法国 · 申根</small></div>
+      <div class="demo-chip">罗马<small>意大利 · 申根</small></div>
+      <div class="demo-chip">巴塞罗那<small>西班牙 · 申根</small></div>
+      <div class="demo-chip sel">伊斯坦布尔<small>土耳其 · 电子签</small></div>
+      <div class="demo-chip">维也纳<small>奥地利 · 申根</small></div>
+      <div class="demo-chip">威尼斯<small>意大利 · 申根</small></div>
+      <div class="demo-chip">伦敦<small>英国 · 签证</small></div>
+      <div class="demo-chip">阿姆斯特丹<small>荷兰 · 申根</small></div>
+    </div>
+  </div>
+
+  <!-- 行程列表 -->
+  <div class="demo-card">
+    <h3>🧳 我的行程</h3>
+    <div class="demo-rows">
+      <div class="demo-row"><div class="dot">1</div><div>伊斯坦布尔<span class="sub"> · 土耳其 · 停留3天</span></div></div>
+      <div class="demo-row"><div class="dot">2</div><div>巴黎<span class="sub"> · 法国 · 停留3天</span></div></div>
+      <div class="demo-row"><div class="dot">3</div><div>威尼斯<span class="sub"> · 意大利 · 停留2天</span></div></div>
+    </div>
+    <div class="demo-tags">
+      <span class="demo-tag">申根签</span><span class="demo-tag">¥350/天</span>
+      <span class="demo-tag">🌤️ 4-6月/9-10月</span><span class="demo-tag">✈️ 3国9天</span>
+    </div>
+  </div>
+
+  <!-- 统计摘要 + 按钮 -->
+  <div class="demo-summary">
+    <h3>我的亚欧非环线</h3>
+    <div class="nums"><div><b>3</b>城市</div><div><b>3</b>国家</div><div><b>~8</b>天数</div><div><b>¥1050</b>日均</div></div>
+  </div>
+  <div class="demo-btns">
+    <button class="demo-btn primary">🔀 按地理路线排序</button>
+    <button class="demo-btn">📤 分享行程</button>
+    <button class="demo-btn danger">重置</button>
+  </div>
+
+  <p class="demo-note">卡片、按钮、标签、行程摘要均为真实组件模拟 · 完整迁移后再看全站效果</p>
+</div>
+
+<script>
+document.querySelectorAll('#switcher button[data-s]').forEach(b=>{
+  b.onclick=()=>{
+    document.documentElement.setAttribute('data-style', b.dataset.s);
+    document.querySelectorAll('#switcher button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+  };
+});
+</script>
+</body>
+</html>
