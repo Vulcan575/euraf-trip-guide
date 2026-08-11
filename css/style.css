@@ -75,10 +75,11 @@ html[data-theme="dark"] body{
 
 /* ---------- Hero 风景轮播 · 水彩滤镜 + 白云 ---------- */
 .hero{position:relative;min-height:var(--hero-h);border-radius:26px;overflow:hidden;margin-bottom:20px;box-shadow:var(--shadow);border:3px solid rgba(255,255,255,0.45);}
-.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.6s ease;transform:scale(1.05);filter:sepia(0.18) saturate(1.10) brightness(1.02);}
-.hero-bg.show{opacity:1;transform:scale(1);}
+/* 滤镜已移到图片 URL 参数（sat/bri），避免运行时 filter 导致全屏大图逐帧重算 */
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;visibility:hidden;transition:opacity 1.6s ease, visibility 1.6s;transform:scale(1.05);}
+.hero-bg.show{opacity:1;visibility:visible;transform:scale(1);}
 .hero::before{content:"";position:absolute;inset:0;background:var(--header-grad);z-index:1;}
-.cloud{position:absolute;background:var(--cloud);border-radius:50%;opacity:0.8;z-index:2;filter:blur(0.6px);animation:cloudDrift linear infinite;}
+.cloud{position:absolute;background:var(--cloud);border-radius:50%;opacity:0.8;z-index:2;animation:cloudDrift linear infinite;}
 .cloud::before,.cloud::after{content:"";position:absolute;background:var(--cloud);border-radius:50%;}
 .cloud.c1{width:130px;height:38px;top:16%;animation-duration:95s;}
 .cloud.c1::before{width:56px;height:56px;left:24px;top:-28px;}

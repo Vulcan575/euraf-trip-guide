@@ -93,10 +93,13 @@ function getVisaClass(v){
 }
 
 /* ---------- 选城市 ---------- */
+let searchTimer = null;
 function searchCities(){
   const q = document.getElementById('citySearch').value.trim();
   currentSearch = q;
-  renderCities();
+  /* 输入防抖：停止敲字 250ms 后才重建列表，避免每敲一个字母全量重建 125 城 DOM */
+  if(searchTimer) clearTimeout(searchTimer);
+  searchTimer = setTimeout(renderCities, 250);
 }
 function renderLockBar(){
   const bar = document.getElementById('routeLockBar');
@@ -722,14 +725,21 @@ function addGearItem(name){
 
 /* ---------- Hero 背景轮播 ---------- */
 let heroIdx = 0;
+let heroTimer = null;
 const heroLayers = document.querySelectorAll('.hero-bg');
-if(heroLayers.length>1){
-  setInterval(function(){
+function startHero(){
+  if(heroTimer || heroLayers.length<=1) return;
+  heroTimer = setInterval(function(){
     heroLayers[heroIdx].classList.remove('show');
     heroIdx = (heroIdx+1)%heroLayers.length;
     heroLayers[heroIdx].classList.add('show');
   }, 5000);
 }
+function stopHero(){ if(heroTimer){ clearInterval(heroTimer); heroTimer = null; } }
+/* 切后台/回前台时暂停轮播，省电也省 GPU（手机低电量时尤其明显） */
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden) stopHero(); else startHero();
+});
 
 /* ---------- 初始化 ---------- */
 applyTheme();
@@ -738,3 +748,4 @@ document.getElementById('daysPerCitySel').value = daysPerCity;
 renderCities();
 renderChecklist();
 document.getElementById('tripCount').textContent = selectedCities.length;
+startHero();
