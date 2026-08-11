@@ -13,8 +13,11 @@
   <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1600&q=80&fm=jpg&fit=crop');"></div>
   <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&q=80&fm=jpg&fit=crop');"></div>
   <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=80&fm=jpg&fit=crop');"></div>
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
   <div class="hero-content">
-    <h1>🌸 姐姐的亚欧非漫游指南</h1>
+    <h1>姐姐的亚欧非漫游指南</h1>
     <p>从新疆出发，穿越中亚、高加索、土耳其、巴尔干、欧洲、北非、中东</p>
     <button id="themeToggle" onclick="toggleTheme()" title="切换深浅色">🌙</button>
   </div>
@@ -87,7 +90,7 @@
         <option value="4">4天</option><option value="5">5天</option>
       </select></label>
       <button class="btn" onclick="sortTrip()">🔀 按地理路线排序</button>
-      <button class="btn" style="background:var(--secondary);" onclick="shareTrip()">📤 分享行程</button>
+      <button class="btn btn-blue" onclick="shareTrip()">📤 分享行程</button>
     </div>
   </div>
   <div class="trip-summary" id="tripSummary"><h2>我的亚欧非环线</h2><p>还没有选择任何城市</p></div>
@@ -110,10 +113,10 @@
 
 <div class="sticky-bar">
   <button class="btn" onclick="switchTab('cities')">选城市</button>
-  <button class="btn" style="background:var(--secondary);" onclick="switchTab('trip')">行程 (<span id="tripCount">0</span>)</button>
+  <button class="btn btn-blue" onclick="switchTab('trip')">行程 (<span id="tripCount">0</span>)</button>
   <button class="btn" onclick="exportData()">导出</button>
   <button class="btn" onclick="document.getElementById('importFile').click()">导入</button>
-  <button class="btn" style="background:var(--danger);" onclick="resetData()">重置</button>
+  <button class="btn btn-red" onclick="resetData()">重置</button>
   <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importData(this)">
 </div>
 
