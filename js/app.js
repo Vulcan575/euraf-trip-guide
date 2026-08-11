@@ -1,15 +1,27 @@
 /* ===== 姐姐的亚欧非漫游指南 · 应用逻辑 ===== */
 /* 依赖：data-cities.js（cities）、data-checklist.js（DEFAULT_CHECKLISTS）先加载 */
 
+/* ---------- 工具 ---------- */
+/* localStorage 安全封装：隐私模式/禁用存储时不崩溃 */
+const ls = {
+  get(k){ try{ return window.localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ window.localStorage.setItem(k,v); }catch(e){} },
+  remove(k){ try{ window.localStorage.removeItem(k); }catch(e){} }
+};
+/* HTML 转义：所有用户可输入的文本（清单/导入数据）必须经过这里 */
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 /* ---------- 状态 ---------- */
 let currentTab = 'cities';
 let currentFilter = 'all';
 let currentSearch = '';
-let selectedCities = JSON.parse(localStorage.getItem('selectedCities') || '[]');
-let checklists = JSON.parse(localStorage.getItem('checklists') || JSON.stringify(DEFAULT_CHECKLISTS));
-let visitedCities = JSON.parse(localStorage.getItem('visitedCities') || '[]');
-let tripDate = localStorage.getItem('tripDate') || '';
-let daysPerCity = parseInt(localStorage.getItem('daysPerCity')) || 3;
+let selectedCities = JSON.parse(ls.get('selectedCities') || '[]').filter(n=>cities[n]);
+let checklists = JSON.parse(ls.get('checklists') || JSON.stringify(DEFAULT_CHECKLISTS));
+let visitedCities = JSON.parse(ls.get('visitedCities') || '[]').filter(n=>cities[n]);
+let tripDate = ls.get('tripDate') || '';
+let daysPerCity = parseInt(ls.get('daysPerCity')) || 3;
 
 /* ---------- 路线顺序（地理路线） ---------- */
 const regionOrder = ['出发地','中亚','高加索','土耳其','巴尔干','欧洲','北非','中东'];
@@ -84,7 +96,7 @@ function filterRegion(region,btn){
 function toggleCity(name){
   const idx = selectedCities.indexOf(name);
   if(idx>-1) selectedCities.splice(idx,1); else selectedCities.push(name);
-  localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
+  ls.set('selectedCities', JSON.stringify(selectedCities));
   renderCities();
   document.getElementById('tripCount').textContent = selectedCities.length;
   renderTrip(); renderGuide(); renderVisa();
@@ -207,12 +219,12 @@ function renderTrip(){
 function toggleVisited(name){
   const idx = visitedCities.indexOf(name);
   if(idx>-1) visitedCities.splice(idx,1); else visitedCities.push(name);
-  localStorage.setItem('visitedCities', JSON.stringify(visitedCities));
+  ls.set('visitedCities', JSON.stringify(visitedCities));
   renderTrip();
 }
 function sortTrip(){
   selectedCities.sort(byRoute);
-  localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
+  ls.set('selectedCities', JSON.stringify(selectedCities));
   renderTrip();
 }
 function shareTrip(){
@@ -244,17 +256,17 @@ function moveCity(idx,dir){
   const j = idx+dir;
   if(j<0 || j>=selectedCities.length) return;
   const tmp = selectedCities[idx]; selectedCities[idx] = selectedCities[j]; selectedCities[j] = tmp;
-  localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
+  ls.set('selectedCities', JSON.stringify(selectedCities));
   renderTrip();
 }
 function setTripDate(){
   tripDate = document.getElementById('tripDateInput').value;
-  localStorage.setItem('tripDate', tripDate);
+  ls.set('tripDate', tripDate);
   renderTrip();
 }
 function setDaysPerCity(){
   daysPerCity = parseInt(document.getElementById('daysPerCitySel').value) || 3;
-  localStorage.setItem('daysPerCity', daysPerCity);
+  ls.set('daysPerCity', daysPerCity);
   renderTrip();
   updateBudget();
 }
@@ -275,7 +287,7 @@ function removeCity(name){
   const idx = selectedCities.indexOf(name);
   if(idx>-1){
     selectedCities.splice(idx,1);
-    localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
+    ls.set('selectedCities', JSON.stringify(selectedCities));
     renderTrip(); renderCities();
     document.getElementById('tripCount').textContent = selectedCities.length;
     renderGuide(); renderVisa();
@@ -285,32 +297,45 @@ function removeCity(name){
 /* ---------- 清单栏 ---------- */
 function renderChecklist(){
   const container = document.getElementById('checklistContent');
-  container.innerHTML = '';
   const cats = {places:'想去的地方',food:'必吃美食',shopping:'购物清单',visa:'签证材料',gear:'装备清单',health:'健康/药品',safety:'安全备忘',misc:'其他'};
   const icons = {places:'📍',food:'🍜',shopping:'🛍️',visa:'🛂',gear:'🎒',health:'💊',safety:'🛡️',misc:'📌'};
+  const blocks = [];
   for(let cat in cats){
     const items = checklists[cat] || [];
     const doneCount = items.filter(i=>i.done).length;
     let html = '<div style="margin-bottom:20px;"><h4 style="color:var(--primary);margin-bottom:10px;">'+icons[cat]+' '+cats[cat]+' <span style="color:var(--text-light);font-size:0.8rem;">('+doneCount+'/'+items.length+')</span></h4>';
     items.forEach((item,idx)=>{
+      /* esc() 转义用户输入，防止 XSS */
       html += '<div class="check-item '+(item.done?'checked':'')+'" onclick="toggleCheck(\''+cat+'\','+idx+')">'
         +'<input type="checkbox" '+(item.done?'checked':'')+' style="margin-right:10px;width:18px;height:18px;accent-color:var(--primary);" onclick="event.stopPropagation();toggleCheck(\''+cat+'\','+idx+')">'
-        +'<span style="flex:1;font-size:0.9rem;">'+item.text+'</span>'
-        +'<span style="font-size:0.75rem;color:var(--text-light);">'+(item.note||'')+'</span>'
+        +'<span style="flex:1;font-size:0.9rem;">'+esc(item.text)+'</span>'
+        +'<span style="font-size:0.75rem;color:var(--text-light);">'+esc(item.note||'')+'</span>'
         +'<button style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:8px;" onclick="event.stopPropagation();deleteCheck(\''+cat+'\','+idx+')">×</button></div>';
     });
-    html += '</div>';
-    container.innerHTML += html;
+    blocks.push(html+'</div>');
   }
+  container.innerHTML = blocks.join('');
+}
+function toggleCheck(cat,idx){
+  if(!checklists[cat] || !checklists[cat][idx]) return;
+  checklists[cat][idx].done = !checklists[cat][idx].done;
+  ls.set('checklists', JSON.stringify(checklists));
+  renderChecklist();
+}
+function deleteCheck(cat,idx){
+  if(!checklists[cat] || !checklists[cat][idx]) return;
+  checklists[cat].splice(idx,1);
+  ls.set('checklists', JSON.stringify(checklists));
+  renderChecklist();
 }
 function toggleCheck(cat,idx){
   checklists[cat][idx].done = !checklists[cat][idx].done;
-  localStorage.setItem('checklists', JSON.stringify(checklists));
+  ls.set('checklists', JSON.stringify(checklists));
   renderChecklist();
 }
 function deleteCheck(cat,idx){
   checklists[cat].splice(idx,1);
-  localStorage.setItem('checklists', JSON.stringify(checklists));
+  ls.set('checklists', JSON.stringify(checklists));
   renderChecklist();
 }
 function addCheckItem(){
@@ -319,7 +344,7 @@ function addCheckItem(){
   if(!text) return;
   if(!checklists[cat]) checklists[cat] = [];
   checklists[cat].push({text, done:false, note:''});
-  localStorage.setItem('checklists', JSON.stringify(checklists));
+  ls.set('checklists', JSON.stringify(checklists));
   document.getElementById('newItemText').value = '';
   renderChecklist();
 }
@@ -408,11 +433,11 @@ function importData(input){
       if(Array.isArray(data.visitedCities)) visitedCities = data.visitedCities.filter(n=>cities[n]);
       if(data.tripDate) tripDate = data.tripDate;
       if(data.daysPerCity) daysPerCity = parseInt(data.daysPerCity) || 3;
-      localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
-      localStorage.setItem('checklists', JSON.stringify(checklists));
-      localStorage.setItem('visitedCities', JSON.stringify(visitedCities));
-      localStorage.setItem('tripDate', tripDate);
-      localStorage.setItem('daysPerCity', daysPerCity);
+      ls.set('selectedCities', JSON.stringify(selectedCities));
+      ls.set('checklists', JSON.stringify(checklists));
+      ls.set('visitedCities', JSON.stringify(visitedCities));
+      ls.set('tripDate', tripDate);
+      ls.set('daysPerCity', daysPerCity);
       renderCities(); renderTrip(); renderGuide(); renderVisa(); renderChecklist(); updateBudget();
       document.getElementById('tripCount').textContent = selectedCities.length;
       input.value = '';
@@ -428,11 +453,11 @@ function resetData(){
   if(!confirm('确定要清空全部数据吗？\n（选中的城市、清单、打卡记录都会删除，且无法恢复）')){
     return;
   }
-  localStorage.removeItem('selectedCities');
-  localStorage.removeItem('checklists');
-  localStorage.removeItem('visitedCities');
-  localStorage.removeItem('tripDate');
-  localStorage.removeItem('daysPerCity');
+  ls.remove('selectedCities');
+  ls.remove('checklists');
+  ls.remove('visitedCities');
+  ls.remove('tripDate');
+  ls.remove('daysPerCity');
   selectedCities = []; checklists = JSON.parse(JSON.stringify(DEFAULT_CHECKLISTS));
   visitedCities = []; tripDate = ''; daysPerCity = 3;
   document.getElementById('tripDateInput').value = '';
@@ -448,10 +473,10 @@ function toggleTheme(){
   const isDark = root.getAttribute('data-theme')==='dark';
   root.setAttribute('data-theme', isDark?'light':'dark');
   document.getElementById('themeToggle').textContent = isDark?'🌙':'☀️';
-  localStorage.setItem('theme', isDark?'light':'dark');
+  ls.set('theme', isDark?'light':'dark');
 }
 function applyTheme(){
-  const saved = localStorage.getItem('theme');
+  const saved = ls.get('theme');
   const root = document.documentElement;
   if(saved==='dark'){
     root.setAttribute('data-theme','dark');
