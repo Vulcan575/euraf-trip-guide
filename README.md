@@ -28,6 +28,10 @@
 └── README.md
 ```
 
+## 🌐 线上地址
+
+**https://sister-trip-guide.pages.dev**（Cloudflare Pages 托管，免费）
+
 ## 🚀 本地使用
 
 直接双击 `index.html` 用浏览器打开即可，无需服务器。
