@@ -6,6 +6,13 @@ let currentTab = 'cities';
 let currentFilter = 'all';
 let selectedCities = JSON.parse(localStorage.getItem('selectedCities') || '[]');
 let checklists = JSON.parse(localStorage.getItem('checklists') || JSON.stringify(DEFAULT_CHECKLISTS));
+let tripDate = localStorage.getItem('tripDate') || '';
+let daysPerCity = parseInt(localStorage.getItem('daysPerCity')) || 3;
+
+/* ---------- 路线顺序（地理路线） ---------- */
+const regionOrder = ['出发地','中亚','高加索','土耳其','巴尔干','欧洲','北非','中东'];
+function byRoute(a,b){ return regionOrder.indexOf(cities[a].r) - regionOrder.indexOf(cities[b].r); }
+function fmtDate(d){ return (d.getMonth()+1)+'月'+d.getDate()+'日'; }
 
 /* ---------- Tab 切换 ---------- */
 function switchTab(tab){
@@ -151,7 +158,12 @@ function renderVisa(){
 function renderTrip(){
   const summary = document.getElementById('tripSummary');
   const list = document.getElementById('tripList');
+  const dateInput = document.getElementById('tripDateInput');
+  const daysSel = document.getElementById('daysPerCitySel');
+  if(dateInput) dateInput.value = tripDate;
+  if(daysSel) daysSel.value = daysPerCity;
   document.getElementById('tripCount').textContent = selectedCities.length;
+  renderItinerary();
   if(selectedCities.length===0){
     summary.innerHTML = '<h2>我的亚欧非环线</h2><p>还没有选择任何城市</p>';
     list.innerHTML = '';
@@ -159,7 +171,7 @@ function renderTrip(){
   }
   let totalBudget = 0;
   selectedCities.forEach(name=>totalBudget += cities[name].b);
-  const days = selectedCities.length*3;
+  const days = selectedCities.length*daysPerCity;
   const countries = new Set(selectedCities.map(n=>cities[n].c).filter(c=>c!=='中国')).size;
   summary.innerHTML = '<h2>我的亚欧非环线</h2><div style="display:flex;justify-content:center;gap:24px;margin-top:12px;flex-wrap:wrap;">'
     +'<div style="text-align:center;"><div style="font-size:2rem;font-weight:700;">'+selectedCities.length+'</div><div style="font-size:0.85rem;opacity:0.9;">城市</div></div>'
@@ -170,11 +182,49 @@ function renderTrip(){
   selectedCities.forEach((name,i)=>{
     const city = cities[name];
     list.innerHTML += '<div style="display:flex;align-items:center;padding:12px;background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);">'
-      +'<div style="background:var(--primary);color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:12px;">'+(i+1)+'</div>'
-      +'<div style="flex:1;"><div style="font-weight:700;">'+name+'</div><div style="font-size:0.8rem;color:var(--text-light);">'+city.c+' · '+city.r+'</div></div>'
-      +'<div style="font-size:0.85rem;color:var(--secondary);font-weight:600;">¥'+city.b+'/天</div>'
+      +'<div style="background:var(--primary);color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:12px;flex-shrink:0;">'+(i+1)+'</div>'
+      +'<div style="flex:1;min-width:0;"><div style="font-weight:700;">'+name+'</div><div style="font-size:0.8rem;color:var(--text-light);">'+city.c+' · '+city.r+'</div></div>'
+      +'<div style="font-size:0.85rem;color:var(--secondary);font-weight:600;margin-right:8px;">¥'+city.b+'/天</div>'
+      +'<button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;padding:2px 4px;" onclick="moveCity('+i+',-1)" title="上移">↑</button>'
+      +'<button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;padding:2px 4px;" onclick="moveCity('+i+',1)" title="下移">↓</button>'
       +'<button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;" onclick="removeCity(\''+name+'\')">×</button></div>';
   });
+}
+function sortTrip(){
+  selectedCities.sort(byRoute);
+  localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
+  renderTrip();
+}
+function moveCity(idx,dir){
+  const j = idx+dir;
+  if(j<0 || j>=selectedCities.length) return;
+  const tmp = selectedCities[idx]; selectedCities[idx] = selectedCities[j]; selectedCities[j] = tmp;
+  localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
+  renderTrip();
+}
+function setTripDate(){
+  tripDate = document.getElementById('tripDateInput').value;
+  localStorage.setItem('tripDate', tripDate);
+  renderTrip();
+}
+function setDaysPerCity(){
+  daysPerCity = parseInt(document.getElementById('daysPerCitySel').value) || 3;
+  localStorage.setItem('daysPerCity', daysPerCity);
+  renderTrip();
+  updateBudget();
+}
+function renderItinerary(){
+  const el = document.getElementById('itineraryList');
+  if(!tripDate || selectedCities.length===0){
+    el.innerHTML = '<p style="color:var(--text-light);font-size:0.85rem;">设置出发日期后自动生成每日行程</p>';
+    return;
+  }
+  const start = new Date(tripDate + 'T12:00:00');
+  el.innerHTML = selectedCities.map((name,i)=>{
+    const d1 = new Date(start); d1.setDate(start.getDate()+i*daysPerCity);
+    const d2 = new Date(start); d2.setDate(start.getDate()+(i+1)*daysPerCity-1);
+    return '<div class="timeline-item"><div class="time" style="font-weight:700;color:var(--primary);">第'+(i*daysPerCity+1)+'-'+(i+1)*daysPerCity+'天 · '+fmtDate(d1)+' - '+fmtDate(d2)+'</div><div class="content"><strong>'+name+'</strong> <span style="color:var(--text-light);font-size:0.8rem;">'+cities[name].c+'</span></div></div>';
+  }).join('');
 }
 function removeCity(name){
   const idx = selectedCities.indexOf(name);
@@ -268,6 +318,8 @@ function exportData(){
 }
 
 /* ---------- 初始化 ---------- */
+document.getElementById('tripDateInput').value = tripDate;
+document.getElementById('daysPerCitySel').value = daysPerCity;
 renderCities();
 renderChecklist();
 document.getElementById('tripCount').textContent = selectedCities.length;
