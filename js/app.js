@@ -506,6 +506,28 @@ function renderTips(){
     html += '<tr><td>'+t.r+'</td><td><b>'+t.tz+'</b></td><td>'+t.diff+'</td></tr>';
   });
   html += '</table></div>'
+    +'<div class="card"><h3>💉 疫苗与健康</h3>'
+    +'<table class="tips-table"><tr><th>区域</th><th>建议疫苗</th><th>说明</th></tr>';
+  TIPS.vaccines.forEach(v=>{
+    html += '<tr><td>'+v.r+'</td><td><b>'+v.v+'</b></td><td>'+v.n+'</td></tr>';
+  });
+  html += '</table></div>'
+    +'<div class="card"><h3>📶 网络与通信</h3>';
+  TIPS.connectivity.forEach(c=>{
+    html += '<div style="padding:10px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:center;"><span style="font-size:1.2rem;">'+c.icon+'</span><div><b>'+c.k+'</b><br><span style="font-size:0.85rem;color:var(--text-light);">'+c.v+'</span></div></div>';
+  });
+  html += '</div>'
+    +'<div class="card"><h3>🙏 习俗与礼仪</h3>'
+    +'<table class="tips-table"><tr><th>区域</th><th>注意</th></tr>';
+  TIPS.customs.forEach(c=>{
+    html += '<tr><td>'+c.r+'</td><td>'+c.v+'</td></tr>';
+  });
+  html += '</table></div>'
+    +'<div class="card"><h3>⚠️ 安全细节</h3>';
+  TIPS.safetyTips.forEach(s=>{
+    html += '<div style="padding:10px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:center;"><span style="font-size:1.2rem;">'+s.icon+'</span><div><b>'+s.k+'</b><br><span style="font-size:0.85rem;color:var(--text-light);">'+s.v+'</span></div></div>';
+  });
+  html += '</div>'
     +'<div class="card"><h3>🛟 安全与应急</h3>';
   TIPS.emergency.forEach(e=>{
     html += '<div style="padding:10px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:center;"><span style="font-size:1.2rem;">'+e.icon+'</span><div><b>'+e.k+'</b><br><span style="font-size:0.85rem;color:var(--text-light);">'+e.v+'</span></div></div>';
