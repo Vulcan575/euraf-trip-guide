@@ -74,6 +74,7 @@ function switchTab(tab){
   const tb = document.querySelector('.tab-btn[data-tab="'+tab+'"]');
   if(tb) tb.classList.add('active');
   currentTab = tab;
+  if(tab==='cities') renderCities();
   if(tab==='guide') renderGuide();
   if(tab==='visa') renderVisa();
   if(tab==='trip') renderTrip();
@@ -81,6 +82,11 @@ function switchTab(tab){
   if(tab==='budget') updateBudget();
   if(tab==='tips') renderTips();
   if(tab==='gear') renderGear();
+  if(tab==='map'){
+    /* 地图懒初始化：section 由 display:none 变为可见后需 invalidateSize 修正尺寸 */
+    initMap();
+    setTimeout(()=>{ if(mapReady){ mapObj.invalidateSize(); renderMap(); } }, 60);
+  }
 }
 
 /* ---------- 工具 ---------- */
@@ -147,6 +153,7 @@ function renderCities(){
     regions[region].forEach(name=>{
       const chip = document.createElement('div');
       chip.className = 'city-chip'+(selectedCities.includes(name)?' selected':'')+(routeLocked?' locked':'');
+      chip.setAttribute('data-name', name);
       const cn = document.createElement('div'); cn.textContent = name;
       const cc = document.createElement('div'); cc.textContent = cities[name].c;
       cc.style.cssText = 'font-size:0.7rem;color:var(--text-light);';
@@ -169,9 +176,12 @@ function toggleCity(name){
   const idx = selectedCities.indexOf(name);
   if(idx>-1) selectedCities.splice(idx,1); else selectedCities.push(name);
   ls.set('selectedCities', JSON.stringify(selectedCities));
-  renderCities();
+  /* 性能：只更新被点击卡片的状态，不再全量重建列表/行程/攻略/签证 */
+  const chip = document.querySelector('.city-chip[data-name="'+name+'"]');
+  if(chip) chip.className = 'city-chip'+(selectedCities.includes(name)?' selected':'')+(routeLocked?' locked':'');
   document.getElementById('tripCount').textContent = selectedCities.length;
-  renderTrip(); renderGuide(); renderVisa();
+  /* 其他 tab 懒渲染：切到对应 tab 时由 switchTab 渲染，不在此处同步全量重建 */
+  if(typeof mapReady!=='undefined' && mapReady) renderMap();
 }
 
 /* ---------- 城市攻略 ---------- */
@@ -182,7 +192,8 @@ function renderGuide(){
     return;
   }
   container.innerHTML = '';
-  selectedCities.forEach(name=>{
+  /* 性能：先拼完整字符串再一次赋值，避免循环内 innerHTML+= 反复解析 */
+  const parts = selectedCities.map(name=>{
     const city = cities[name];
     let html = '<div class="city-detail" style="background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow);"><h2 style="color:var(--primary);">'+name+' <span style="font-size:0.9rem;color:var(--text-light);">'+city.c+'</span></h2>';
     html += '<span class="tag '+getVisaClass(city.v)+'">'+city.v+'</span><span class="tag" style="background:#e8f4f8;color:#0c5460;">¥'+city.b+'/天</span><span class="tag" style="background:#fff3cd;color:#856404;">🌤️ '+city.best+'</span>';
@@ -209,8 +220,9 @@ function renderGuide(){
     html += '<h3>青旅推荐</h3><div style="background:#fff8e1;border-radius:8px;padding:8px 12px;font-size:0.85rem;">'+city.h.join(' · ')+'</div>';
     html += '<h3>必吃美食</h3><div style="background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#880e4f;">'+city.f+'</div>';
     html += '<h3>姐姐贴士</h3><div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:0.85rem;border-left:4px solid #f39c12;">'+city.tip+'</div></div>';
-    container.innerHTML += html;
+    return html;
   });
+  container.innerHTML = parts.join('');
 }
 
 /* ---------- 签证助手 ---------- */
@@ -331,7 +343,8 @@ function renderTrip(){
     +'<div style="text-align:center;"><div style="font-size:2rem;font-weight:700;">~'+days+'</div><div style="font-size:0.85rem;opacity:0.9;">预估天数</div></div>'
     +'<div style="text-align:center;"><div style="font-size:2rem;font-weight:700;">¥'+totalBudget+'</div><div style="font-size:0.85rem;opacity:0.9;">日均总预算</div></div></div>';
   list.innerHTML = '';
-  selectedCities.forEach((name,i)=>{
+  /* 性能：先拼完整字符串再一次赋值 */
+  const parts = selectedCities.map((name,i)=>{
     const city = cities[name];
     const visited = visitedCities.indexOf(name)>-1;
     const days = getDays(name);
@@ -340,7 +353,7 @@ function renderTrip(){
       daySel += '<option value="'+d+'"'+(d===days?' selected':'')+'>'+d+'天</option>';
     }
     daySel += '</select>';
-    list.innerHTML += '<div style="display:flex;align-items:center;padding:12px;background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);'+(visited?'opacity:0.85;border-color:var(--secondary);':'')+'">'
+    return '<div style="display:flex;align-items:center;padding:12px;background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);'+(visited?'opacity:0.85;border-color:var(--secondary);':'')+'">'
       +'<div style="background:'+(visited?'var(--secondary)':'var(--primary)')+';color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:12px;flex-shrink:0;">'+(visited?'✓':(i+1))+'</div>'
       +'<div style="flex:1;min-width:0;"><div style="font-weight:700;">'+name+'</div><div style="font-size:0.8rem;color:var(--text-light);">'+city.c+' · '+city.r+'</div>'
       +'<div style="margin-top:6px;display:flex;align-items:center;gap:4px;font-size:0.8rem;color:var(--text-light);">🕐 停留 '+daySel+(cityDays[name]?'<span style="font-size:0.7rem;background:var(--chip-hover);border-radius:999px;padding:1px 8px;">已单独设置</span>':'')+'</div></div>'
@@ -349,6 +362,7 @@ function renderTrip(){
       +'<button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;padding:2px 4px;" onclick="moveCity('+i+',1)" title="下移">↓</button>'
       +'<button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;" onclick="removeCity(\''+name+'\')">×</button></div>';
   });
+  list.innerHTML = parts.join('');
 }
 function toggleVisited(name){
   const idx = visitedCities.indexOf(name);
@@ -360,6 +374,7 @@ function sortTrip(){
   selectedCities.sort(byRoute);
   ls.set('selectedCities', JSON.stringify(selectedCities));
   renderTrip();
+  if(mapReady) renderMap();
 }
 function shareTrip(){
   if(selectedCities.length===0){ alert('还没有选择城市，先去选城市吧！'); return; }
@@ -392,6 +407,7 @@ function moveCity(idx,dir){
   const tmp = selectedCities[idx]; selectedCities[idx] = selectedCities[j]; selectedCities[j] = tmp;
   ls.set('selectedCities', JSON.stringify(selectedCities));
   renderTrip();
+  if(mapReady) renderMap();
 }
 function setTripDate(){
   tripDate = document.getElementById('tripDateInput').value;
@@ -426,9 +442,10 @@ function removeCity(name){
   if(idx>-1){
     selectedCities.splice(idx,1);
     ls.set('selectedCities', JSON.stringify(selectedCities));
-    renderTrip(); renderCities();
+    renderTrip();
     document.getElementById('tripCount').textContent = selectedCities.length;
-    renderGuide(); renderVisa();
+    /* 列表/攻略/签证懒渲染：切到对应 tab 时由 switchTab 重建 */
+    if(mapReady) renderMap();
   }
 }
 
@@ -559,6 +576,12 @@ function toggleTheme(){
   root.setAttribute('data-theme', isDark?'light':'dark');
   document.getElementById('themeToggle').textContent = isDark?'🌙':'☀️';
   ls.set('theme', isDark?'light':'dark');
+  /* 地图底图跟随主题：深色用 Dark_Gray，浅色用 Street_Map */
+  if(typeof mapReady!=='undefined' && mapReady && mapTileLayer){
+    mapTileLayer.setUrl(isDark
+      ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+      : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}');
+  }
 }
 function applyTheme(){
   const saved = ls.get('theme');
@@ -721,6 +744,86 @@ function addGearItem(name){
   ls.set('checklists', JSON.stringify(checklists));
   alert('已加入清单栏：'+name+' ✅ 去「清单栏」勾选打包');
   renderChecklist();
+}
+
+/* ---------- 路线地图（Leaflet · ESRI 瓦片） ---------- */
+/* 懒初始化：首次切到地图 tab 才创建实例；瓦片源 ESRI（OSM/CARTO 国内被墙） */
+let mapObj = null;
+let mapReady = false;
+let mapAllCities = false;
+let mapRouteLayer = null;
+let mapCityLayer = null;
+let mapTileLayer = null;
+const MAP_TILES = {
+  light: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+  dark:  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+};
+function initMap(){
+  if(mapReady) return;
+  const el = document.getElementById('mapCanvas');
+  if(typeof L==='undefined'){
+    el.innerHTML = '<div class="empty-state" style="text-align:center;padding:80px;color:var(--text-light);"><div style="font-size:3rem;">🗺️</div><p>地图组件加载失败</p></div>';
+    return;
+  }
+  mapObj = L.map(el, { center:[32, 50], zoom:3, worldCopyJump:true, zoomControl:true });
+  const isDark = (document.documentElement.getAttribute('data-theme')==='dark');
+  mapTileLayer = L.tileLayer(isDark?MAP_TILES.dark:MAP_TILES.light, {
+    attribution: '&copy; Esri & contributors', maxZoom: 19
+  }).addTo(mapObj);
+  mapRouteLayer = L.layerGroup().addTo(mapObj);
+  mapCityLayer = L.layerGroup().addTo(mapObj);
+  mapReady = true;
+}
+function renderMap(){
+  if(!mapReady) return;
+  mapRouteLayer.clearLayers();
+  mapCityLayer.clearLayers();
+  const isDark = (document.documentElement.getAttribute('data-theme')==='dark');
+  const lineColor = isDark ? '#fbbf24' : '#2563eb';
+  const sel = selectedCities.filter(n=>CITY_COORDS[n]);
+  /* 路线：按「我的行程」顺序连接已选城市 */
+  if(sel.length>=2){
+    L.polyline(sel.map(n=>CITY_COORDS[n]), {
+      color: lineColor, weight: 3, opacity: 0.85
+    }).addTo(mapRouteLayer);
+  }
+  /* 已选城市：粉色大点，弹窗显示攻略摘要 */
+  sel.forEach((name,i)=>{
+    const p = CITY_COORDS[name];
+    const city = cities[name];
+    const m = L.circleMarker(p, { radius:7, color:'#fff', weight:2, fillColor:'#e91e63', fillOpacity:0.95 });
+    m.bindPopup('<div style="font-size:13px;line-height:1.6;min-width:180px;">'
+      +'<b>'+ (i+1) +'. '+name+'</b> <span style="color:#888;">'+city.c+'</span><br>'
+      +'签证:'+city.v+' · 预算:¥'+city.b+'/天<br>'
+      +'<span style="color:#555;">'+esc((city.i||'').slice(0,42))+'…</span><br>'
+      +'<button onclick="goGuide(\''+name+'\')" style="margin-top:6px;padding:5px 12px;border-radius:999px;border:none;background:#e91e63;color:#fff;cursor:pointer;font-size:12px;">📖 查看攻略</button>'
+      +'</div>');
+    m.addTo(mapCityLayer);
+  });
+  /* 可选：显示全部城市灰点 */
+  if(mapAllCities){
+    for(const n in CITY_COORDS){
+      if(sel.indexOf(n)>-1) continue;
+      L.circleMarker(CITY_COORDS[n], { radius:3.5, color:'#999', weight:1, fillColor:'#bbb', fillOpacity:0.55 }).addTo(mapCityLayer);
+    }
+  }
+  const countries = new Set(sel.map(n=>cities[n].c).filter(c=>c!=='中国')).size;
+  const stats = document.getElementById('mapStats');
+  if(stats) stats.textContent = '已选 '+sel.length+' 城 · '+countries+' 国';
+}
+function fitMapRoute(){
+  if(!mapReady || selectedCities.length===0) return;
+  const sel = selectedCities.filter(n=>CITY_COORDS[n]);
+  mapObj.fitBounds(L.latLngBounds(sel.map(n=>CITY_COORDS[n])).pad(0.25));
+}
+function toggleMapAllCities(){
+  mapAllCities = !mapAllCities;
+  const btn = document.getElementById('mapShowAllBtn');
+  if(btn) btn.textContent = mapAllCities ? '🙈 只显示已选' : '🌐 显示所有城市';
+  renderMap();
+}
+function goGuide(name){
+  switchTab('guide');
 }
 
 /* ---------- Hero 背景轮播 ---------- */

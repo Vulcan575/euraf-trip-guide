@@ -6,6 +6,7 @@
 <title>姐姐的亚欧非漫游指南</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 </head>
 <body>
 <div class="container">
@@ -32,6 +33,7 @@
   <button class="tab-btn" data-tab="budget" onclick="switchTab('budget')">预算规划</button>
   <button class="tab-btn" data-tab="tips" onclick="switchTab('tips')">行前贴士</button>
   <button class="tab-btn" data-tab="gear" onclick="switchTab('gear')">🎒 装备推荐</button>
+  <button class="tab-btn" data-tab="map" onclick="switchTab('map')">🗺️ 路线地图</button>
 </div>
 
 <div id="cities" class="section active">
@@ -123,6 +125,19 @@
   </div>
   <div id="gearContent"></div>
 </div>
+
+<div id="map" class="section">
+  <div class="card" style="margin-bottom:12px;">
+    <h3>🗺️ 路线地图</h3>
+    <p style="font-size:0.85rem;color:var(--text-light);margin:0 0 10px;">按「我的行程」顺序绘制你的环线，点城市弹出攻略。🌗 底图自动跟随深浅色主题</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" id="mapFitBtn" onclick="fitMapRoute()">👀 缩放至路线</button>
+      <button class="btn" id="mapShowAllBtn" onclick="toggleMapAllCities()">🌐 显示所有城市</button>
+      <span id="mapStats" style="align-self:center;font-size:0.85rem;color:var(--text-light);"></span>
+    </div>
+  </div>
+  <div id="mapCanvas" style="height:520px;border-radius:16px;overflow:hidden;border:1px solid var(--border);"></div>
+</div>
 </div>
 
 <div class="sticky-bar">
@@ -135,6 +150,8 @@
 <script src="js/data-meta.js"></script>
 <script src="js/data-checklist.js"></script>
 <script src="js/data-gear.js"></script>
+<script src="js/data-route.js"></script>
+<script src="vendor/leaflet/leaflet.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

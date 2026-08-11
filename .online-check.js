@@ -40,7 +40,7 @@ sandbox.window = sandbox;
 vm.createContext(sandbox);
 
 // ---- load scripts ----
-for(const f of ['js/data-cities.js','js/data-meta.js','js/data-checklist.js','js/data-gear.js','js/app.js']){
+for(const f of ['js/data-cities.js','js/data-meta.js','js/data-checklist.js','js/data-gear.js','js/data-route.js','js/app.js']){
   vm.runInContext(fs.readFileSync(f,'utf8'), sandbox, {filename:f});
 }
 vm.runInContext('window.onload && window.onload();', sandbox);
@@ -88,6 +88,7 @@ const fns = [
   ['budget tab','switchTab(\'budget\')'],
   ['tips tab','switchTab(\'tips\')'],
   ['gear tab','switchTab(\'gear\')'],
+  ['map tab(无Leaflet降级)','switchTab(\'map\')'],
 ];
 for(const [label,expr] of fns){
   try{ vm.runInContext(expr+';', sandbox); console.log('✅', label); }
@@ -106,5 +107,19 @@ try{
   const t = sandbox.document.getElementById('tripCount').textContent || sandbox.document.getElementById('tripCount').innerHTML;
   console.log('✅ 行程城市数:', t);
 }catch(e){ console.log('❌ 行程异常:', e.message); allOk=false; }
+// 地图容器降级提示
+try{
+  vm.runInContext('switchTab(\'map\');', sandbox);
+  const mc = sandbox.document.getElementById('mapCanvas').innerHTML;
+  if(mc.includes('地图组件加载失败')) console.log('✅ 地图降级提示正常');
+  else console.log('⚠️ 地图容器:', String(mc).slice(0,60));
+}catch(e){ console.log('❌ 地图tab异常:', e.message); allOk=false; }
+// 坐标覆盖验证
+try{
+  const coords = vm.runInContext('CITY_COORDS', sandbox);
+  const cData = vm.runInContext('cities', sandbox);
+  const miss = Object.keys(cData).filter(n=>!coords[n]);
+  console.log(miss.length===0 ? '✅ 坐标覆盖 125/125' : '❌ 缺坐标: '+miss.join('、'));
+}catch(e){ console.log('❌ 坐标验证异常:', e.message); allOk=false; }
 
 console.log(allOk ? '\n=== 全部通过 ===' : '\n=== 存在失败项 ===');
