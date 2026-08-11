@@ -24,7 +24,7 @@ let tripDate = ls.get('tripDate') || '';
 let daysPerCity = parseInt(ls.get('daysPerCity')) || 3;
 
 /* ---------- 路线顺序（地理路线） ---------- */
-const regionOrder = ['出发地','中亚','高加索','土耳其','巴尔干','欧洲','北非','中东'];
+const regionOrder = ['出发地','中亚','高加索','土耳其','巴尔干','欧洲','北非','中东','东北亚','东非','南非','南亚','东南亚'];
 function byRoute(a,b){ return regionOrder.indexOf(cities[a].r) - regionOrder.indexOf(cities[b].r); }
 function fmtDate(d){ return (d.getMonth()+1)+'月'+d.getDate()+'日'; }
 

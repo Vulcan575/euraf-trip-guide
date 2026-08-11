@@ -59,6 +59,11 @@ body{background:var(--bg);background-image:var(--bg-grad);background-attachment:
 .region-title[data-region="欧洲"]{background-image:url('https://images.unsplash.com/photo-1533105079780-92b9be482077?w=1400&q=80&fm=jpg&fit=crop');}
 .region-title[data-region="北非"]{background-image:url('https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1400&q=80&fm=jpg&fit=crop');}
 .region-title[data-region="中东"]{background-image:url('https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="东北亚"]{background-image:url('https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="东非"]{background-image:url('https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="南非"]{background-image:url('https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="南亚"]{background-image:url('https://images.unsplash.com/photo-1548013146-72479768bada?w=1400&q=80&fm=jpg&fit=crop');}
+.region-title[data-region="东南亚"]{background-image:url('https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?w=1400&q=80&fm=jpg&fit=crop');}
 
 /* ---------- 城市网格 ---------- */
 .city-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
