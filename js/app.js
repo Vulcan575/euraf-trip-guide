@@ -555,52 +555,99 @@ function applyTheme(){
 /* ---------- 行前贴士 ---------- */
 function renderTips(){
   const el = document.getElementById('tipsContent');
-  let html = '<div class="card"><h3>🗣️ 日常用语速查</h3>'
+  /* 分类导航（用于胶囊跳转与折叠） */
+  const nav = [
+    {id:'tip-lang',icon:'🗣️',t:'日常用语'},
+    {id:'tip-plug',icon:'🔌',t:'电源插头'},
+    {id:'tip-tz',icon:'🕐',t:'时区'},
+    {id:'tip-vax',icon:'💉',t:'疫苗健康'},
+    {id:'tip-net',icon:'📶',t:'网络通信'},
+    {id:'tip-money',icon:'💰',t:'货币换汇'},
+    {id:'tip-custom',icon:'🙏',t:'习俗礼仪'},
+    {id:'tip-safe',icon:'⚠️',t:'安全细节'},
+    {id:'tip-emerg',icon:'🛟',t:'应急电话'}
+  ];
+  let html = '<div class="tips-nav">';
+  nav.forEach(n=>{
+    html += '<button class="tips-nav-btn" onclick="openTip(\''+n.id+'\')">'+n.icon+' '+n.t+'</button>';
+  });
+  html += '</div><p style="font-size:0.8rem;color:var(--text-light);margin:8px 2px 12px;">👆 点上方分类快速跳转 · 点卡片标题展开/收起</p>';
+  /* 1. 日常用语 */
+  html += '<details class="tip-card" id="tip-lang" open><summary>🗣️ 日常用语速查<span class="tip-sum-hint">点击展开/收起</span></summary>'
     +'<table class="tips-table"><tr><th>区域</th><th>你好</th><th>谢谢</th></tr>';
   for(let r in TIPS.languages){
     html += '<tr><td>'+r+'</td><td>'+TIPS.languages[r].hi+'</td><td>'+TIPS.languages[r].th+'</td></tr>';
   }
-  html += '</table></div>'
-    +'<div class="card"><h3>🔌 电源插头</h3>'
+  html += '</table><p style="font-size:0.8rem;color:var(--text-light);margin-top:8px;">💡 出发前把沿线区域用语截图保存到手机相册，离线也能用</p></details>';
+  /* 2. 电源插头 */
+  html += '<details class="tip-card" id="tip-plug"><summary>🔌 电源插头<span class="tip-sum-hint">点击展开/收起</span></summary>'
     +'<table class="tips-table"><tr><th>区域</th><th>插头类型</th><th>说明</th></tr>';
   TIPS.plugs.forEach(p=>{
     html += '<tr><td>'+p.r+'</td><td><b>'+p.p+'</b></td><td>'+p.note+'</td></tr>';
   });
-  html += '</table><p style="font-size:0.8rem;color:var(--text-light);margin-top:8px;">大多数国家为 220V，中国两脚插头基本通用；以色列为 230V H 型需转换头</p></div>'
-    +'<div class="card"><h3>🕐 时区</h3>'
+  html += '</table><p style="font-size:0.8rem;color:var(--text-light);margin-top:8px;">大多数国家为 220V，中国两脚插头基本通用；以色列为 230V H 型需转换头</p></details>';
+  /* 3. 时区 */
+  html += '<details class="tip-card" id="tip-tz"><summary>🕐 时区速查<span class="tip-sum-hint">点击展开/收起</span></summary>'
     +'<table class="tips-table"><tr><th>区域</th><th>时区</th><th>与北京时间差</th></tr>';
   TIPS.timezones.forEach(t=>{
     html += '<tr><td>'+t.r+'</td><td><b>'+t.tz+'</b></td><td>'+t.diff+'</td></tr>';
   });
-  html += '</table></div>'
-    +'<div class="card"><h3>💉 疫苗与健康</h3>'
+  html += '</table><p style="font-size:0.8rem;color:var(--text-light);margin-top:8px;">💡 跨时区时手机开启「自动时区」，到新国家第一时间看手机确认</p></details>';
+  /* 4. 疫苗与健康 */
+  html += '<details class="tip-card" id="tip-vax"><summary>💉 疫苗与健康<span class="tip-sum-hint">点击展开/收起</span></summary>'
     +'<table class="tips-table"><tr><th>区域</th><th>建议疫苗</th><th>说明</th></tr>';
   TIPS.vaccines.forEach(v=>{
     html += '<tr><td>'+v.r+'</td><td><b>'+v.v+'</b></td><td>'+v.n+'</td></tr>';
   });
-  html += '</table></div>'
-    +'<div class="card"><h3>📶 网络与通信</h3>';
+  html += '</table><p style="font-size:0.8rem;color:var(--text-light);margin-top:8px;">📅 出发前 4-6 周到三甲医院国际旅行门诊，一次搞定咨询+接种</p></details>';
+  /* 5. 网络与通信 */
+  html += '<details class="tip-card" id="tip-net"><summary>📶 网络与通信<span class="tip-sum-hint">点击展开/收起</span></summary>';
   TIPS.connectivity.forEach(c=>{
     html += '<div style="padding:10px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:center;"><span style="font-size:1.2rem;">'+c.icon+'</span><div><b>'+c.k+'</b><br><span style="font-size:0.85rem;color:var(--text-light);">'+c.v+'</span></div></div>';
   });
-  html += '</div>'
-    +'<div class="card"><h3>🙏 习俗与礼仪</h3>'
+  html += '</details>';
+  /* 6. 货币与换汇 */
+  html += '<details class="tip-card" id="tip-money"><summary>💰 货币与换汇<span class="tip-sum-hint">点击展开/收起</span></summary>'
+    +'<table class="tips-table"><tr><th>区域</th><th>主要货币</th><th>换汇建议</th></tr>';
+  TIPS.money.forEach(m=>{
+    html += '<tr><td>'+m.r+'</td><td><b>'+m.cur+'</b></td><td style="font-size:0.85rem;">'+m.note+'</td></tr>';
+  });
+  html += '</table></details>';
+  /* 7. 习俗与礼仪 */
+  html += '<details class="tip-card" id="tip-custom"><summary>🙏 习俗与礼仪<span class="tip-sum-hint">点击展开/收起</span></summary>'
     +'<table class="tips-table"><tr><th>区域</th><th>注意</th></tr>';
   TIPS.customs.forEach(c=>{
-    html += '<tr><td>'+c.r+'</td><td>'+c.v+'</td></tr>';
+    html += '<tr><td>'+c.r+'</td><td style="font-size:0.85rem;">'+c.v+'</td></tr>';
   });
-  html += '</table></div>'
-    +'<div class="card"><h3>⚠️ 安全细节</h3>';
+  html += '</table></details>';
+  /* 8. 安全细节 */
+  html += '<details class="tip-card" id="tip-safe"><summary>⚠️ 安全细节<span class="tip-sum-hint">点击展开/收起</span></summary>';
   TIPS.safetyTips.forEach(s=>{
     html += '<div style="padding:10px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:center;"><span style="font-size:1.2rem;">'+s.icon+'</span><div><b>'+s.k+'</b><br><span style="font-size:0.85rem;color:var(--text-light);">'+s.v+'</span></div></div>';
   });
-  html += '</div>'
-    +'<div class="card"><h3>🛟 安全与应急</h3>';
+  html += '</details>';
+  /* 9. 安全与应急 */
+  html += '<details class="tip-card" id="tip-emerg"><summary>🛟 安全与应急<span class="tip-sum-hint">点击展开/收起</span></summary>';
   TIPS.emergency.forEach(e=>{
     html += '<div style="padding:10px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:center;"><span style="font-size:1.2rem;">'+e.icon+'</span><div><b>'+e.k+'</b><br><span style="font-size:0.85rem;color:var(--text-light);">'+e.v+'</span></div></div>';
   });
-  html += '</div>';
+  html += '</details>';
   el.innerHTML = html;
+}
+
+/* 行前贴士：分类胶囊点击 → 展开目标卡片 + 收起其他 + 平滑滚动 */
+function openTip(id){
+  const cats = ['tip-lang','tip-plug','tip-tz','tip-vax','tip-net','tip-money','tip-custom','tip-safe','tip-emerg'];
+  cats.forEach(cid=>{
+    const d = document.getElementById(cid);
+    if(d){ d.open = (cid===id); }
+  });
+  const target = document.getElementById(id);
+  if(target){
+    setTimeout(function(){
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 50);
+  }
 }
 
 /* ---------- Hero 背景轮播 ---------- */

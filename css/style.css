@@ -169,6 +169,24 @@ html[data-theme="dark"] body{
 .tips-table th{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;padding:10px;text-align:left;}
 .tips-table td{padding:10px;border-bottom:1px solid var(--border);}
 .tips-table tr:hover td{background:var(--chip-hover);}
+/* 行前贴士：顶部分类导航胶囊（横向滚动） */
+.tips-nav{position:sticky;top:0;z-index:50;display:flex;gap:8px;overflow-x:auto;padding:10px 2px;margin-bottom:4px;background:var(--bg);scrollbar-width:thin;}
+.tips-nav::-webkit-scrollbar{height:4px;}
+.tips-nav::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.tips-nav-btn{flex-shrink:0;padding:8px 14px;border:2px solid var(--border);border-radius:999px;background:var(--card);color:var(--text);font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 2px 0 rgba(92,74,61,0.15);}
+.tips-nav-btn:hover{transform:translateY(-1px);border-color:var(--primary);color:var(--primary);}
+.tips-nav-btn:active{transform:translateY(1px);box-shadow:none;}
+/* 行前贴士：可折叠卡片 */
+.tip-card{background:var(--card);border:2px solid var(--border);border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden;}
+.tip-card summary{list-style:none;cursor:pointer;padding:14px 18px;font-size:1rem;font-weight:800;color:var(--primary);display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background .2s;}
+.tip-card summary::-webkit-details-marker{display:none;}
+.tip-card summary:hover{background:var(--chip-hover);}
+.tip-card summary::after{content:"▾";transition:transform .25s;color:var(--text-light);font-size:0.85rem;flex-shrink:0;}
+.tip-card:not([open]) summary::after{transform:rotate(-90deg);}
+.tip-card .tip-sum-hint{font-size:0.72rem;font-weight:400;color:var(--text-light);opacity:0;transition:opacity .2s;}
+.tip-card summary:hover .tip-sum-hint{opacity:1;}
+.tip-card > *:not(summary){padding-left:18px;padding-right:18px;}
+.tip-card > *:not(summary):last-child{padding-bottom:14px;}
 .visit-btn{background:none;border:2px solid var(--border);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:0.75rem;color:var(--text-light);flex-shrink:0;font-family:inherit;}
 .visit-btn:hover{border-color:var(--primary);color:var(--primary);}
 .visit-btn.visited{background:var(--visited-bg);color:var(--primary);border-color:var(--primary);font-weight:700;}
