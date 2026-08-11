@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-<header><h1>🌸 姐姐的亚欧非漫游指南</h1><p>从新疆出发，穿越中亚、高加索、土耳其、巴尔干、欧洲、北非、中东</p></header>
+<header><h1>🌸 姐姐的亚欧非漫游指南</h1><p>从新疆出发，穿越中亚、高加索、土耳其、巴尔干、欧洲、北非、中东</p><button id="themeToggle" onclick="toggleTheme()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.25);border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:1.1rem;" title="切换深浅色">🌙</button></header>
 <div class="tabs">
   <button class="tab-btn active" data-tab="cities" onclick="switchTab('cities')">选城市</button>
   <button class="tab-btn" data-tab="checklist" onclick="switchTab('checklist')">清单栏</button>
@@ -16,9 +16,11 @@
   <button class="tab-btn" data-tab="visa" onclick="switchTab('visa')">签证助手</button>
   <button class="tab-btn" data-tab="trip" onclick="switchTab('trip')">我的行程</button>
   <button class="tab-btn" data-tab="budget" onclick="switchTab('budget')">预算规划</button>
+  <button class="tab-btn" data-tab="tips" onclick="switchTab('tips')">行前贴士</button>
 </div>
 
 <div id="cities" class="section active">
+  <input type="search" id="citySearch" placeholder="🔍 搜索城市或国家..." oninput="searchCities()" style="width:100%;box-sizing:border-box;padding:12px 16px;border:1px solid var(--border);border-radius:24px;background:var(--card);color:var(--text);font-size:0.95rem;margin-bottom:12px;">
   <div class="filter-btns" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
     <button class="filter-btn active" onclick="filterRegion('all',this)">全部</button>
     <button class="filter-btn" onclick="filterRegion('中亚',this)">中亚</button>
@@ -70,6 +72,7 @@
         <option value="4">4天</option><option value="5">5天</option>
       </select></label>
       <button class="btn" onclick="sortTrip()">🔀 按地理路线排序</button>
+      <button class="btn" style="background:var(--secondary);" onclick="shareTrip()">📤 分享行程</button>
     </div>
   </div>
   <div class="trip-summary" id="tripSummary"><h2>我的亚欧非环线</h2><p>还没有选择任何城市</p></div>
@@ -86,12 +89,17 @@
   </div>
   <div id="budgetBreakdown"></div>
 </div>
+
+<div id="tips" class="section"><div id="tipsContent"></div></div>
 </div>
 
 <div class="sticky-bar">
   <button class="btn" onclick="switchTab('cities')">选城市</button>
   <button class="btn" style="background:var(--secondary);" onclick="switchTab('trip')">行程 (<span id="tripCount">0</span>)</button>
-  <button class="btn" onclick="exportData()">保存数据</button>
+  <button class="btn" onclick="exportData()">导出</button>
+  <button class="btn" onclick="document.getElementById('importFile').click()">导入</button>
+  <button class="btn" style="background:var(--danger);" onclick="resetData()">重置</button>
+  <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importData(this)">
 </div>
 
 <script src="js/data-cities.js"></script>

@@ -4,8 +4,10 @@
 /* ---------- 状态 ---------- */
 let currentTab = 'cities';
 let currentFilter = 'all';
+let currentSearch = '';
 let selectedCities = JSON.parse(localStorage.getItem('selectedCities') || '[]');
 let checklists = JSON.parse(localStorage.getItem('checklists') || JSON.stringify(DEFAULT_CHECKLISTS));
+let visitedCities = JSON.parse(localStorage.getItem('visitedCities') || '[]');
 let tripDate = localStorage.getItem('tripDate') || '';
 let daysPerCity = parseInt(localStorage.getItem('daysPerCity')) || 3;
 
@@ -27,6 +29,7 @@ function switchTab(tab){
   if(tab==='trip') renderTrip();
   if(tab==='checklist') renderChecklist();
   if(tab==='budget') updateBudget();
+  if(tab==='tips') renderTips();
 }
 
 /* ---------- 工具 ---------- */
@@ -39,6 +42,11 @@ function getVisaClass(v){
 }
 
 /* ---------- 选城市 ---------- */
+function searchCities(){
+  const q = document.getElementById('citySearch').value.trim();
+  currentSearch = q;
+  renderCities();
+}
 function renderCities(){
   const list = document.getElementById('cityList');
   list.innerHTML = '';
@@ -46,8 +54,13 @@ function renderCities(){
   for(let name in cities){
     const city = cities[name];
     if(currentFilter!=='all' && city.r!==currentFilter) continue;
+    if(currentSearch && name.indexOf(currentSearch)===-1 && city.c.indexOf(currentSearch)===-1) continue;
     if(!regions[city.r]) regions[city.r] = [];
     regions[city.r].push(name);
+  }
+  if(Object.keys(regions).length===0){
+    list.innerHTML = '<div class="empty-state" style="text-align:center;padding:40px;color:var(--text-light);"><div style="font-size:3rem;">🔍</div><p>没有找到「'+currentSearch+'」相关城市</p></div>';
+    return;
   }
   for(let region in regions){
     list.innerHTML += '<div class="region-title" style="font-size:1.2rem;font-weight:700;margin:16px 0 8px;padding-left:8px;border-left:4px solid var(--primary);">'+region+'</div>';
@@ -181,19 +194,51 @@ function renderTrip(){
   list.innerHTML = '';
   selectedCities.forEach((name,i)=>{
     const city = cities[name];
-    list.innerHTML += '<div style="display:flex;align-items:center;padding:12px;background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);">'
-      +'<div style="background:var(--primary);color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:12px;flex-shrink:0;">'+(i+1)+'</div>'
+    const visited = visitedCities.indexOf(name)>-1;
+    list.innerHTML += '<div style="display:flex;align-items:center;padding:12px;background:var(--card);border-radius:12px;margin-bottom:8px;border:1px solid var(--border);'+(visited?'opacity:0.85;border-color:var(--secondary);':'')+'">'
+      +'<div style="background:'+(visited?'var(--secondary)':'var(--primary)')+';color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:12px;flex-shrink:0;">'+(visited?'✓':(i+1))+'</div>'
       +'<div style="flex:1;min-width:0;"><div style="font-weight:700;">'+name+'</div><div style="font-size:0.8rem;color:var(--text-light);">'+city.c+' · '+city.r+'</div></div>'
-      +'<div style="font-size:0.85rem;color:var(--secondary);font-weight:600;margin-right:8px;">¥'+city.b+'/天</div>'
+      +'<button class="visit-btn'+(visited?' visited':'')+'" onclick="toggleVisited(\''+name+'\')">'+(visited?'✅ 已打卡':'📍 打卡')+'</button>'
       +'<button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;padding:2px 4px;" onclick="moveCity('+i+',-1)" title="上移">↑</button>'
       +'<button style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:1.1rem;padding:2px 4px;" onclick="moveCity('+i+',1)" title="下移">↓</button>'
       +'<button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.2rem;" onclick="removeCity(\''+name+'\')">×</button></div>';
   });
 }
+function toggleVisited(name){
+  const idx = visitedCities.indexOf(name);
+  if(idx>-1) visitedCities.splice(idx,1); else visitedCities.push(name);
+  localStorage.setItem('visitedCities', JSON.stringify(visitedCities));
+  renderTrip();
+}
 function sortTrip(){
   selectedCities.sort(byRoute);
   localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
   renderTrip();
+}
+function shareTrip(){
+  if(selectedCities.length===0){ alert('还没有选择城市，先去选城市吧！'); return; }
+  const countries = [...new Set(selectedCities.map(n=>cities[n].c).filter(c=>c!=='中国'))].join('、');
+  let text = '🌸 姐姐的亚欧非漫游指南\n'
+    +'路线：'+selectedCities.map((n,i)=>(i+1)+'. '+n+'（'+cities[n].c+'）').join(' → ')+'\n'
+    +'共 '+selectedCities.length+' 城 · '+countries+' 国 · 每城约 '+daysPerCity+' 天';
+  if(tripDate) text += '\n出发：'+tripDate;
+  if(visitedCities.length) text += '\n已打卡：'+visitedCities.join('、');
+  text += '\n—— 来自 姐姐的亚欧非漫游指南 🌍';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>alert('✅ 行程已复制到剪贴板，去粘贴给朋友吧！'),()=>fallbackCopy(text));
+  }else{
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); alert('✅ 行程已复制到剪贴板！'); }
+  catch(e){ alert('复制失败，请手动复制以下内容：\n\n'+text); }
+  document.body.removeChild(ta);
 }
 function moveCity(idx,dir){
   const j = idx+dir;
@@ -333,9 +378,9 @@ function updateBudget(){
     +'<div style="font-size:1.8rem;font-weight:700;">¥'+(base+transportTotal)+'</div></div></div>';
 }
 
-/* ---------- 数据导出 ---------- */
+/* ---------- 数据导入/导出/重置 ---------- */
 function exportData(){
-  const data = {selectedCities, checklists, exportDate:new Date().toISOString()};
+  const data = {appVersion:'1.0', selectedCities, checklists, visitedCities, tripDate, daysPerCity, exportDate:new Date().toISOString()};
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -345,8 +390,106 @@ function exportData(){
   URL.revokeObjectURL(url);
   alert('行程数据已保存！');
 }
+function importData(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      /* 数据校验：只接受合法结构，防止坏文件污染 */
+      if(!data || !Array.isArray(data.selectedCities) || !data.checklists){
+        alert('文件格式不对，请选择本应用导出的 .json 文件');
+        input.value = '';
+        return;
+      }
+      selectedCities = data.selectedCities.filter(n=>cities[n]);
+      checklists = data.checklists;
+      if(Array.isArray(data.visitedCities)) visitedCities = data.visitedCities.filter(n=>cities[n]);
+      if(data.tripDate) tripDate = data.tripDate;
+      if(data.daysPerCity) daysPerCity = parseInt(data.daysPerCity) || 3;
+      localStorage.setItem('selectedCities', JSON.stringify(selectedCities));
+      localStorage.setItem('checklists', JSON.stringify(checklists));
+      localStorage.setItem('visitedCities', JSON.stringify(visitedCities));
+      localStorage.setItem('tripDate', tripDate);
+      localStorage.setItem('daysPerCity', daysPerCity);
+      renderCities(); renderTrip(); renderGuide(); renderVisa(); renderChecklist(); updateBudget();
+      document.getElementById('tripCount').textContent = selectedCities.length;
+      input.value = '';
+      alert('✅ 数据导入成功！');
+    }catch(err){
+      alert('文件解析失败：不是有效的 JSON 文件');
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+function resetData(){
+  if(!confirm('确定要清空全部数据吗？\n（选中的城市、清单、打卡记录都会删除，且无法恢复）')){
+    return;
+  }
+  localStorage.removeItem('selectedCities');
+  localStorage.removeItem('checklists');
+  localStorage.removeItem('visitedCities');
+  localStorage.removeItem('tripDate');
+  localStorage.removeItem('daysPerCity');
+  selectedCities = []; checklists = JSON.parse(JSON.stringify(DEFAULT_CHECKLISTS));
+  visitedCities = []; tripDate = ''; daysPerCity = 3;
+  document.getElementById('tripDateInput').value = '';
+  document.getElementById('daysPerCitySel').value = '3';
+  renderCities(); renderTrip(); renderGuide(); renderVisa(); renderChecklist(); updateBudget();
+  document.getElementById('tripCount').textContent = 0;
+  alert('已重置，可以重新开始规划啦！');
+}
+
+/* ---------- 暗色模式 ---------- */
+function toggleTheme(){
+  const root = document.documentElement;
+  const isDark = root.getAttribute('data-theme')==='dark';
+  root.setAttribute('data-theme', isDark?'light':'dark');
+  document.getElementById('themeToggle').textContent = isDark?'🌙':'☀️';
+  localStorage.setItem('theme', isDark?'light':'dark');
+}
+function applyTheme(){
+  const saved = localStorage.getItem('theme');
+  const root = document.documentElement;
+  if(saved==='dark'){
+    root.setAttribute('data-theme','dark');
+    document.getElementById('themeToggle').textContent = '☀️';
+  }
+}
+
+/* ---------- 行前贴士 ---------- */
+function renderTips(){
+  const el = document.getElementById('tipsContent');
+  let html = '<div class="card"><h3>🗣️ 日常用语速查</h3>'
+    +'<table class="tips-table"><tr><th>区域</th><th>你好</th><th>谢谢</th></tr>';
+  for(let r in TIPS.languages){
+    html += '<tr><td>'+r+'</td><td>'+TIPS.languages[r].hi+'</td><td>'+TIPS.languages[r].th+'</td></tr>';
+  }
+  html += '</table></div>'
+    +'<div class="card"><h3>🔌 电源插头</h3>'
+    +'<table class="tips-table"><tr><th>区域</th><th>插头类型</th><th>说明</th></tr>';
+  TIPS.plugs.forEach(p=>{
+    html += '<tr><td>'+p.r+'</td><td><b>'+p.p+'</b></td><td>'+p.note+'</td></tr>';
+  });
+  html += '</table><p style="font-size:0.8rem;color:var(--text-light);margin-top:8px;">大多数国家为 220V，中国两脚插头基本通用；以色列为 230V H 型需转换头</p></div>'
+    +'<div class="card"><h3>🕐 时区</h3>'
+    +'<table class="tips-table"><tr><th>区域</th><th>时区</th><th>与北京时间差</th></tr>';
+  TIPS.timezones.forEach(t=>{
+    html += '<tr><td>'+t.r+'</td><td><b>'+t.tz+'</b></td><td>'+t.diff+'</td></tr>';
+  });
+  html += '</table></div>'
+    +'<div class="card"><h3>🛟 安全与应急</h3>';
+  TIPS.emergency.forEach(e=>{
+    html += '<div style="padding:10px 0;border-bottom:1px dashed var(--border);display:flex;gap:10px;align-items:center;"><span style="font-size:1.2rem;">'+e.icon+'</span><div><b>'+e.k+'</b><br><span style="font-size:0.85rem;color:var(--text-light);">'+e.v+'</span></div></div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
 
 /* ---------- 初始化 ---------- */
+applyTheme();
 document.getElementById('tripDateInput').value = tripDate;
 document.getElementById('daysPerCitySel').value = daysPerCity;
 renderCities();
