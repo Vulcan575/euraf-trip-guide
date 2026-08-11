@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>姐姐的亚欧非漫游指南</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -114,7 +115,6 @@
 <div class="sticky-bar">
   <button class="btn" onclick="switchTab('cities')">选城市</button>
   <button class="btn btn-blue" onclick="switchTab('trip')">行程 (<span id="tripCount">0</span>)</button>
-  <button class="btn" onclick="exportData()">导出</button>
   <button class="btn" onclick="document.getElementById('importFile').click()">导入</button>
   <button class="btn btn-red" onclick="resetData()">重置</button>
   <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importData(this)">

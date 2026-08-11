@@ -416,17 +416,6 @@ function updateBudget(){
 }
 
 /* ---------- 数据导入/导出/重置 ---------- */
-function exportData(){
-  const data = {appVersion:'1.0', selectedCities, checklists, visitedCities, tripDate, daysPerCity, exportDate:new Date().toISOString()};
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = '姐姐亚欧非行程_'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  alert('行程数据已保存！');
-}
 function importData(input){
   const file = input.files && input.files[0];
   if(!file) return;
