@@ -1,0 +1,50 @@
+/* ===== 姐姐的亚欧非漫游指南 · 样式 ===== */
+:root{
+  --bg:#faf7f2;--card:#fff;--primary:#e67e22;--secondary:#27ae60;--danger:#e74c3c;
+  --text:#2c3e50;--text-light:#8a8a95;--border:#e0d5c7;
+  --shadow:0 4px 20px rgba(0,0,0,0.08);--radius:16px;
+  --visited-bg:#e8f8f0;--chip-hover:#f5efe6;--header-grad:linear-gradient(135deg,#e67e22,#f39c12);
+}
+html[data-theme="dark"]{
+  --bg:#141420;--card:#1f1f33;--primary:#f39c12;--secondary:#34d37e;--danger:#ff6b6b;
+  --text:#e8e8f4;--text-light:#8f8fa8;--border:#33334d;
+  --shadow:0 4px 20px rgba(0,0,0,0.4);--visited-bg:#123024;--chip-hover:#2a2a44;
+  --header-grad:linear-gradient(135deg,#b45309,#f39c12);
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;margin:0;padding-bottom:76px;}
+.container{max-width:900px;margin:0 auto;padding:16px;}
+header{text-align:center;padding:40px 20px;background:var(--header-grad);color:white;border-radius:var(--radius);margin-bottom:20px;}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:16px;}
+.tab-btn{flex-shrink:0;padding:10px 18px;border:none;background:var(--card);border-radius:24px;cursor:pointer;font-size:0.9rem;font-weight:600;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.05);white-space:nowrap;border:1px solid var(--border);}
+.tab-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+.filter-btn{padding:6px 14px;border:1px solid var(--border);background:var(--card);border-radius:20px;cursor:pointer;font-size:0.85rem;color:var(--text);}
+.filter-btn.active{background:var(--primary);color:white;border-color:var(--primary);font-weight:600;}
+.section{display:none;}.section.active{display:block;animation:fadeIn 0.3s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--border);}
+.city-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+.city-chip{padding:10px;border-radius:12px;background:var(--card);border:2px solid var(--border);cursor:pointer;text-align:center;font-size:0.85rem;font-weight:600;}
+.city-chip:hover{background:var(--chip-hover);}
+.city-chip.selected{border-color:var(--secondary);background:var(--visited-bg);color:var(--secondary);}
+.tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-right:6px;}
+.visa-free{background:#d4edda;color:#155724;}.visa-landing{background:#fff3cd;color:#856404;}
+.visa-evisa{background:#cce5ff;color:#004085;}.visa-schengen{background:#e2d4f0;color:#4a148c;}
+.visa-hard{background:#f8d7da;color:#721c24;}
+.trek-box{background:linear-gradient(135deg,#e8f8f0,#d4edda);border-radius:12px;padding:12px;margin:8px 0;border-left:4px solid var(--secondary);}
+.check-item{display:flex;align-items:center;padding:8px 12px;background:var(--card);border-radius:10px;margin-bottom:6px;border:1px solid var(--border);cursor:pointer;}
+.check-item.checked{opacity:0.6;text-decoration:line-through;background:var(--chip-hover);}
+.trip-summary{background:var(--header-grad);color:white;border-radius:var(--radius);padding:20px;margin-bottom:16px;text-align:center;}
+.timeline{position:relative;padding-left:24px;}.timeline::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--primary);}
+.timeline-item{position:relative;margin-bottom:16px;padding-left:16px;}
+.timeline-item::before{content:"";position:absolute;left:-20px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid var(--card);}
+.sticky-bar{position:sticky;bottom:0;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:center;z-index:100;}
+.btn{padding:10px 20px;border:none;border-radius:24px;background:var(--primary);color:white;font-weight:600;cursor:pointer;font-size:0.9rem;}
+.visa-table{width:100%;border-collapse:collapse;}
+.visa-table th{background:var(--primary);color:#fff;padding:10px;text-align:left;}
+.visa-table td{padding:10px;border-bottom:1px solid var(--border);}
+@media print{
+  .tabs,.sticky-bar,.filter-btns{display:none!important;}
+  .section{display:block!important;page-break-inside:avoid;}
+  .card,.city-detail{box-shadow:none;border:1px solid #ccc;}
+  body{background:#fff;color:#000;padding-bottom:0;}
+}

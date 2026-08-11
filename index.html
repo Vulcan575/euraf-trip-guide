@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>姐姐的亚欧非漫游指南</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+<header><h1>🌸 姐姐的亚欧非漫游指南</h1><p>从新疆出发，穿越中亚、高加索、土耳其、巴尔干、欧洲、北非、中东</p></header>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="cities" onclick="switchTab('cities')">选城市</button>
+  <button class="tab-btn" data-tab="checklist" onclick="switchTab('checklist')">清单栏</button>
+  <button class="tab-btn" data-tab="guide" onclick="switchTab('guide')">城市攻略</button>
+  <button class="tab-btn" data-tab="visa" onclick="switchTab('visa')">签证助手</button>
+  <button class="tab-btn" data-tab="trip" onclick="switchTab('trip')">我的行程</button>
+  <button class="tab-btn" data-tab="budget" onclick="switchTab('budget')">预算规划</button>
+</div>
+
+<div id="cities" class="section active">
+  <div class="filter-btns" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+    <button class="filter-btn active" onclick="filterRegion('all',this)">全部</button>
+    <button class="filter-btn" onclick="filterRegion('中亚',this)">中亚</button>
+    <button class="filter-btn" onclick="filterRegion('高加索',this)">高加索</button>
+    <button class="filter-btn" onclick="filterRegion('土耳其',this)">土耳其</button>
+    <button class="filter-btn" onclick="filterRegion('巴尔干',this)">巴尔干</button>
+    <button class="filter-btn" onclick="filterRegion('欧洲',this)">欧洲</button>
+    <button class="filter-btn" onclick="filterRegion('北非',this)">北非</button>
+    <button class="filter-btn" onclick="filterRegion('中东',this)">中东</button>
+  </div>
+  <div id="cityList"></div>
+</div>
+
+<div id="checklist" class="section">
+  <div class="card">
+    <h3>添加自定义事项</h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="text" id="newItemText" placeholder="添加新事项..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:24px;">
+      <select id="newItemCat" style="padding:10px;border-radius:24px;border:1px solid var(--border);">
+        <option value="places">想去的地方</option>
+        <option value="food">必吃美食</option>
+        <option value="shopping">购物清单</option>
+        <option value="visa">签证材料</option>
+        <option value="gear">装备清单</option>
+        <option value="health">健康/药品</option>
+        <option value="safety">安全备忘</option>
+        <option value="misc">其他</option>
+      </select>
+      <button class="btn" onclick="addCheckItem()">添加</button>
+    </div>
+  </div>
+  <div id="checklistContent"></div>
+</div>
+
+<div id="guide" class="section"><div id="guideContent"></div></div>
+
+<div id="visa" class="section">
+  <div class="card"><h3>签证办理时间线</h3><div class="timeline" id="visaTimeline"></div></div>
+  <div class="card"><h3>签证要求一览</h3><table class="visa-table" id="visaTable"></table></div>
+</div>
+
+<div id="trip" class="section">
+  <div class="trip-summary" id="tripSummary"><h2>我的亚欧非环线</h2><p>还没有选择任何城市</p></div>
+  <div class="trip-list" id="tripList"></div>
+</div>
+
+<div id="budget" class="section">
+  <div class="card">
+    <h3>预算计算器</h3>
+    <input type="range" id="budgetSlider" min="80" max="600" value="180" oninput="updateBudget()" style="width:100%;margin:16px 0;">
+    <div style="text-align:center;font-size:1.5rem;color:var(--primary);font-weight:700;">¥<span id="budgetValue">180</span>/天</div>
+  </div>
+  <div id="budgetBreakdown"></div>
+</div>
+</div>
+
+<div class="sticky-bar">
+  <button class="btn" onclick="switchTab('cities')">选城市</button>
+  <button class="btn" style="background:var(--secondary);" onclick="switchTab('trip')">行程 (<span id="tripCount">0</span>)</button>
+  <button class="btn" onclick="exportData()">保存数据</button>
+</div>
+
+<script src="js/data-cities.js"></script>
+<script src="js/data-meta.js"></script>
+<script src="js/data-checklist.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
