@@ -95,6 +95,12 @@ function renderGuide(){
         html += '<div class="trek-box"><h4 style="color:var(--secondary);margin-bottom:4px;">'+p[0]+'</h4><p style="font-size:0.85rem;">'+p[1]+'</p><p style="font-size:0.85rem;margin-top:4px;">难度: '+p[2]+' · 时长: '+p[3]+'</p></div>';
       });
     }
+    if(city.x && city.x.length>0){
+      html += '<h3>大额体验（另算预算）</h3>';
+      city.x.forEach(x=>{
+        html += '<div style="background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#880e4f;margin-bottom:6px;">🎈 '+x.n+': <strong>'+x.p+'</strong></div>';
+      });
+    }
     html += '<h3>青旅推荐</h3><div style="background:#fff8e1;border-radius:8px;padding:8px 12px;font-size:0.85rem;">'+city.h.join(' · ')+'</div>';
     html += '<h3>必吃美食</h3><div style="background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#880e4f;">'+city.f+'</div>';
     html += '<h3>姐姐贴士</h3><div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:0.85rem;border-left:4px solid #f39c12;">'+city.tip+'</div></div>';
