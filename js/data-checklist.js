@@ -1,11 +1,11 @@
 /* ===== 默认清单数据（首次打开时写入 localStorage）===== */
 const DEFAULT_CHECKLISTS = {
-  places:[{text:"伊犁草原看日落",done:false,note:"新疆"},{text:"雷吉斯坦广场拍日出",done:false,note:"撒马尔罕"},{text:"圣三一教堂看日照金山",done:false,note:"卡兹别克"},{text:"卡帕多奇亚坐热气球",done:false,note:"土耳其"},{text:"撒哈拉沙漠露营",done:false,note:"摩洛哥"}],
-  food:[{text:"吃正宗撒马尔罕抓饭",done:false,note:"乌兹别克"},{text:"喝格鲁吉亚红酒",done:false,note:"西格纳吉"},{text:"吃khinkali汤包",done:false,note:"第比利斯"},{text:"吃塔吉锅",done:false,note:"摩洛哥"},{text:"吃葡式蛋挞",done:false,note:"里斯本"}],
-  shopping:[{text:"乌兹别克刺绣",done:false,note:"中亚"},{text:"土耳其地毯",done:false,note:"土耳其"},{text:"摩洛哥阿甘油",done:false,note:"马拉喀什"}],
-  visa:[{text:"护照有效期>6个月",done:false,note:"必备"},{text:"土耳其电子签$60",done:false,note:"提前1周"},{text:"埃及落地签现金$25",done:false,note:"出发前"}],
-  gear:[{text:"65L背包+防雨罩",done:false,note:"必备"},{text:"头巾/围巾",done:false,note:"清真寺+防晒"},{text:"卫生巾/棉条",done:false,note:"偏远地区难买"}],
-  health:[{text:"肠胃药",done:false,note:"必备"},{text:"防晒霜SPF50+",done:false,note:"沙漠/高原"},{text:"高原反应药",done:false,note:"帕米尔/卡兹别克"}],
-  safety:[{text:"购买紧急救援保险",done:false,note:"含医疗转运"},{text:"天黑后乖乖回住处",done:false,note:"姐姐保命法则"},{text:"穿着端庄",done:false,note:"摩洛哥和埃及"}],
-  misc:[{text:"学几句俄语/土耳其语",done:false,note:"你好/谢谢/多少钱"},{text:"准备小额美元现金",done:false,note:"应急用"}]
+  places:[{text:"伊犁草原看日落",done:false,note:"新疆"},{text:"雷吉斯坦广场拍日出",done:false,note:"撒马尔罕"},{text:"圣三一教堂看日照金山",done:false,note:"卡兹别克"},{text:"卡帕多奇亚坐热气球",done:false,note:"土耳其"},{text:"撒哈拉沙漠露营",done:false,note:"摩洛哥"},{text:"蒙古包住一晚看星空",done:false,note:"乌兰巴托"},{text:"莫斯科地铁站巡礼",done:false,note:"东北亚"},{text:"塞伦盖蒂看角马渡河",done:false,note:"坦桑尼亚"},{text:"桌山缆车看云桌",done:false,note:"开普敦"},{text:"恒河日出坐船",done:false,note:"瓦拉纳西"},{text:"吴哥窟日出",done:false,note:"暹粒"},{text:"蒲甘热气球看千塔晨雾",done:false,note:"缅甸"}],
+  food:[{text:"吃正宗撒马尔罕抓饭",done:false,note:"乌兹别克"},{text:"喝格鲁吉亚红酒",done:false,note:"西格纳吉"},{text:"吃khinkali汤包",done:false,note:"第比利斯"},{text:"吃塔吉锅",done:false,note:"摩洛哥"},{text:"吃葡式蛋挞",done:false,note:"里斯本"},{text:"喝俄罗斯红菜汤",done:false,note:"莫斯科"},{text:"吃南非烤肉braai",done:false,note:"开普敦"},{text:"吃印度黄油鸡",done:false,note:"新德里"},{text:"喝越南滴漏咖啡",done:false,note:"胡志明市"},{text:"吃冬阴功和芒果糯米饭",done:false,note:"曼谷"}],
+  shopping:[{text:"乌兹别克刺绣",done:false,note:"中亚"},{text:"土耳其地毯",done:false,note:"土耳其"},{text:"摩洛哥阿甘油",done:false,note:"马拉喀什"},{text:"蒙古羊绒围巾",done:false,note:"乌兰巴托"},{text:"印度纱丽或手镯",done:false,note:"新德里"},{text:"泰国手工皂和香薰",done:false,note:"清迈夜市"}],
+  visa:[{text:"护照有效期>6个月",done:false,note:"必备"},{text:"土耳其电子签$60",done:false,note:"提前1周"},{text:"埃及落地签现金$25",done:false,note:"出发前"},{text:"肯尼亚/坦桑尼亚电子签",done:false,note:"safari前办"},{text:"南非签证材料提前备",done:false,note:"财产证明"},{text:"印度电子签",done:false,note:"提前1个月"}],
+  gear:[{text:"65L背包+防雨罩",done:false,note:"必备"},{text:"头巾/围巾",done:false,note:"清真寺+防晒"},{text:"卫生巾/棉条",done:false,note:"偏远地区难买"},{text:"望远镜",done:false,note:"safari看动物"},{text:"轻薄羽绒服",done:false,note:"东非草原早晚冷"},{text:"抓绒睡袋内胆",done:false,note:"青旅+营地用"}],
+  health:[{text:"肠胃药",done:false,note:"必备"},{text:"防晒霜SPF50+",done:false,note:"沙漠/高原"},{text:"高原反应药",done:false,note:"帕米尔/卡兹别克"},{text:"黄热病疫苗",done:false,note:"肯尼亚/坦桑尼亚入境要查"},{text:"疟疾药+驱蚊液",done:false,note:"东非/东南亚雨季"},{text:"创可贴+碘伏棉签",done:false,note:"徒步磨脚必备"}],
+  safety:[{text:"购买紧急救援保险",done:false,note:"含医疗转运"},{text:"天黑后乖乖回住处",done:false,note:"姐姐保命法则"},{text:"穿着端庄",done:false,note:"摩洛哥和埃及"},{text:"南非市区别夜行",done:false,note:"约翰内斯堡"},{text:"寺庙和清真寺拖鞋进场",done:false,note:"泰国/缅甸/中东"},{text:"随身复印护照首页",done:false,note:"原件锁酒店"}],
+  misc:[{text:"学几句俄语/土耳其语",done:false,note:"你好/谢谢/多少钱"},{text:"准备小额美元现金",done:false,note:"应急用"},{text:"下载离线地图",done:false,note:"中亚/非洲信号差"},{text:"装Uber/Grab",done:false,note:"东南亚打车"},{text:"换当地货币零钱",done:false,note:"付小费和厕所"}]
 };
