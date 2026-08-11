@@ -135,6 +135,15 @@ html[data-theme="dark"] body{
 .city-chip{padding:10px;border-radius:16px;background:var(--card);border:2px solid var(--border);cursor:pointer;text-align:center;font-size:0.85rem;font-weight:700;transition:all .2s;}
 .city-chip:hover{background:var(--chip-hover);border-color:var(--primary-2);transform:translateY(-3px) rotate(-1deg);box-shadow:var(--shadow);}
 .city-chip.selected{border-color:var(--primary);background:var(--visited-bg);color:var(--primary);}
+/* 行程锁定：城市不可误触 */
+.city-chip.locked{cursor:not-allowed;opacity:0.72;filter:grayscale(0.5);}
+.city-chip.locked:hover{transform:none;box-shadow:none;border-color:var(--border);}
+.city-chip.locked.selected:hover{border-color:var(--primary);background:var(--visited-bg);color:var(--primary);}
+/* 行程跟随 */
+.journey-dot{display:inline-block;padding:6px 12px;border-radius:999px;border:2px solid var(--border);background:var(--card);font-size:0.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.journey-dot:hover{border-color:var(--primary-2);transform:translateY(-2px);}
+.journey-dot.visited{border-color:var(--secondary);background:#eef7e2;color:var(--secondary);}
+.journey-dot.current{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 3px 0 rgba(92,74,61,0.22);}
 
 /* ---------- 标签 ---------- */
 .tag{display:inline-block;padding:4px 10px;border-radius:999px;font-size:0.75rem;font-weight:700;margin-right:6px;}

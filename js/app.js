@@ -18,8 +18,34 @@ let currentTab = 'cities';
 let currentFilter = 'all';
 let currentSearch = '';
 let selectedCities = JSON.parse(ls.get('selectedCities') || '[]').filter(n=>cities[n]);
-let checklists = JSON.parse(ls.get('checklists') || JSON.stringify(DEFAULT_CHECKLISTS));
+/* 行程锁定：行程非空即锁定，点「修改路线」解锁 —— 防首页误触 */
+let routeLocked = selectedCities.length>0;
+/* 清单版本合并：默认清单扩充后，老用户自动补入新默认项（不覆盖已改动的数据） */
+const CHECKLIST_VER = 2;
+function mergeChecklists(saved){
+  const merged = saved || {};
+  for(let cat in DEFAULT_CHECKLISTS){
+    if(!merged[cat]) merged[cat] = [];
+    const have = new Set(merged[cat].map(i=>i.text));
+    DEFAULT_CHECKLISTS[cat].forEach(d=>{
+      if(!have.has(d.text)) merged[cat].push({text:d.text, done:false, note:d.note||''});
+    });
+  }
+  return merged;
+}
+let checklists = (function(){
+  try{
+    const saved = JSON.parse(ls.get('checklists') || 'null');
+    if(saved && ls.get('checklistVer')===String(CHECKLIST_VER)) return saved;
+    const merged = mergeChecklists(saved);
+    ls.set('checklistVer', String(CHECKLIST_VER));
+    ls.set('checklists', JSON.stringify(merged));
+    return merged;
+  }catch(e){ return JSON.parse(JSON.stringify(DEFAULT_CHECKLISTS)); }
+})();
 let visitedCities = JSON.parse(ls.get('visitedCities') || '[]').filter(n=>cities[n]);
+let journeyCity = ls.get('journeyCity') || '';
+if(!selectedCities.includes(journeyCity)) journeyCity = '';
 let tripDate = ls.get('tripDate') || '';
 let daysPerCity = parseInt(ls.get('daysPerCity')) || 3;
 
@@ -59,7 +85,24 @@ function searchCities(){
   currentSearch = q;
   renderCities();
 }
+function renderLockBar(){
+  const bar = document.getElementById('routeLockBar');
+  if(!bar) return;
+  if(selectedCities.length===0){
+    bar.innerHTML = '<div style="background:var(--card);border:1px dashed var(--border);border-radius:14px;padding:10px 16px;font-size:0.85rem;color:var(--text-light);margin-bottom:12px;">🧭 从下面挑选想去的城市，选完后行程自动锁定，防止误触</div>';
+    return;
+  }
+  if(routeLocked){
+    bar.innerHTML = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(135deg,#e8f4f8,#ffffff);border:1px solid #b8e0ef;border-radius:14px;padding:10px 16px;margin-bottom:12px;"><span style="font-size:1.2rem;">🔒</span><span style="flex:1;font-size:0.85rem;">行程已锁定（'+selectedCities.length+'城），城市不可误触</span><button class="btn" onclick="unlockRoute()">✏️ 修改路线</button></div>';
+  }else{
+    bar.innerHTML = '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff8e1;border:1px solid #f5d76e;border-radius:14px;padding:10px 16px;margin-bottom:12px;"><span style="font-size:1.2rem;">✏️</span><span style="flex:1;font-size:0.85rem;">编辑模式：点击城市可加入/移出，改完记得锁定</span><button class="btn btn-blue" onclick="lockRoute()">✅ 完成锁定</button></div>';
+  }
+}
+function unlockRoute(){ routeLocked = false; renderLockBar(); renderCities(); }
+function lockRoute(){ routeLocked = true; renderLockBar(); renderCities(); }
+
 function renderCities(){
+  renderLockBar();
   const list = document.getElementById('cityList');
   list.innerHTML = '';
   const regions = {};
@@ -87,7 +130,7 @@ function renderCities(){
     const grid = document.createElement('div'); grid.className = 'city-grid';
     regions[region].forEach(name=>{
       const chip = document.createElement('div');
-      chip.className = 'city-chip'+(selectedCities.includes(name)?' selected':'');
+      chip.className = 'city-chip'+(selectedCities.includes(name)?' selected':'')+(routeLocked?' locked':'');
       const cn = document.createElement('div'); cn.textContent = name;
       const cc = document.createElement('div'); cc.textContent = cities[name].c;
       cc.style.cssText = 'font-size:0.7rem;color:var(--text-light);';
@@ -106,6 +149,7 @@ function filterRegion(region,btn){
   renderCities();
 }
 function toggleCity(name){
+  if(routeLocked) return;
   const idx = selectedCities.indexOf(name);
   if(idx>-1) selectedCities.splice(idx,1); else selectedCities.push(name);
   ls.set('selectedCities', JSON.stringify(selectedCities));
@@ -191,8 +235,62 @@ function renderVisa(){
   table.innerHTML = tb;
 }
 
+/* ---------- 行程跟随 ---------- */
+/* 下一站：journeyCity 之后的城市；没标记过就按打卡进度顺延 */
+function nextStop(){
+  if(selectedCities.length===0) return null;
+  if(!journeyCity){
+    const visited = selectedCities.filter(n=>visitedCities.includes(n));
+    return selectedCities[visited.length] || null;
+  }
+  const idx = selectedCities.indexOf(journeyCity);
+  if(idx<0) return selectedCities[0];
+  return selectedCities[idx+1] || null;
+}
+function setJourney(name){
+  if(!selectedCities.includes(name)) return;
+  journeyCity = name;
+  ls.set('journeyCity', name);
+  renderTrip();
+}
+function renderJourney(){
+  const el = document.getElementById('journeyBox');
+  if(!el) return;
+  if(selectedCities.length===0){ el.innerHTML = ''; return; }
+  const next = nextStop();
+  let html = '<div class="card" style="margin-bottom:16px;">'
+    +'<h3 style="margin-bottom:10px;">🚩 行程跟随</h3>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">';
+  selectedCities.forEach(n=>{
+    const isCur = n===journeyCity;
+    const isVis = visitedCities.includes(n);
+    const cls = isCur?'journey-dot current':(isVis?'journey-dot visited':'journey-dot');
+    html += '<span class="'+cls+'" onclick="setJourney(\''+n+'\')" title="标记我已到达'+n+'">'+(isCur?'🚩 ':'')+n+'</span>';
+  });
+  html += '</div><p style="font-size:0.8rem;color:var(--text-light);margin:0;">点城市标记「我已到达」，下一站攻略自动更新，进度自动保存</p></div>';
+  if(next){
+    const c = cities[next];
+    html += '<div class="card" style="border:2px solid var(--primary);margin-bottom:16px;">'
+      +'<h3 style="margin-bottom:8px;">🧭 下一站 · '+next+' <span style="font-size:0.85rem;color:var(--text-light);">'+c.c+'</span></h3>'
+      +'<div style="margin-bottom:10px;">'
+      +'<span class="tag '+getVisaClass(c.v)+'">'+c.v+'</span><span class="tag" style="background:#e8f4f8;color:#0c5460;">¥'+c.b+'/天</span><span class="tag" style="background:#fff3cd;color:#856404;">🌤️ '+c.best+'</span></div>';
+    html += '<h4 style="color:var(--primary);margin:10px 0 6px;">📍 景点</h4><ul style="list-style:none;margin:0;padding:0;">';
+    c.a.slice(0,3).forEach(attr=>{
+      const p = attr.split(':'); const n = p[0]; const d = p.slice(1).join(':');
+      html += '<li style="padding:6px 0;border-bottom:1px dashed var(--border);"><strong style="color:var(--primary);">'+n+'</strong><br><span style="font-size:0.85rem;">'+d+'</span></li>';
+    });
+    html += '</ul>';
+    html += '<h4 style="color:var(--primary);margin:10px 0 6px;">🛏️ 青旅</h4><div style="background:#fff8e1;border-radius:8px;padding:8px 12px;font-size:0.85rem;">'+c.h.join(' · ')+'</div>';
+    html += '<h4 style="color:var(--primary);margin:10px 0 6px;">🍜 必吃</h4><div style="background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#880e4f;">'+c.f+'</div>';
+    html += '<h4 style="color:var(--primary);margin:10px 0 6px;">💡 贴士</h4><div style="background:#fff3e0;border-radius:8px;padding:8px 12px;font-size:0.85rem;border-left:4px solid #f39c12;">'+c.tip+'</div>';
+    html += '<div style="margin-top:12px;"><button class="btn btn-blue" onclick="setJourney(\''+next+'\');toggleVisited(\''+next+'\')">🚩 我到 '+next+' 了</button></div></div>';
+  }
+  el.innerHTML = html;
+}
+
 /* ---------- 我的行程 ---------- */
 function renderTrip(){
+  renderJourney();
   const summary = document.getElementById('tripSummary');
   const list = document.getElementById('tripList');
   const dateInput = document.getElementById('tripDateInput');
@@ -415,52 +513,20 @@ function updateBudget(){
     +'<div style="font-size:1.8rem;font-weight:700;">¥'+(base+transportTotal)+'</div></div></div>';
 }
 
-/* ---------- 数据导入/导出/重置 ---------- */
-function importData(input){
-  const file = input.files && input.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      const data = JSON.parse(e.target.result);
-      /* 数据校验：只接受合法结构，防止坏文件污染 */
-      if(!data || !Array.isArray(data.selectedCities) || !data.checklists){
-        alert('文件格式不对，请选择本应用导出的 .json 文件');
-        input.value = '';
-        return;
-      }
-      selectedCities = data.selectedCities.filter(n=>cities[n]);
-      checklists = data.checklists;
-      if(Array.isArray(data.visitedCities)) visitedCities = data.visitedCities.filter(n=>cities[n]);
-      if(data.tripDate) tripDate = data.tripDate;
-      if(data.daysPerCity) daysPerCity = parseInt(data.daysPerCity) || 3;
-      ls.set('selectedCities', JSON.stringify(selectedCities));
-      ls.set('checklists', JSON.stringify(checklists));
-      ls.set('visitedCities', JSON.stringify(visitedCities));
-      ls.set('tripDate', tripDate);
-      ls.set('daysPerCity', daysPerCity);
-      renderCities(); renderTrip(); renderGuide(); renderVisa(); renderChecklist(); updateBudget();
-      document.getElementById('tripCount').textContent = selectedCities.length;
-      input.value = '';
-      alert('✅ 数据导入成功！');
-    }catch(err){
-      alert('文件解析失败：不是有效的 JSON 文件');
-      input.value = '';
-    }
-  };
-  reader.readAsText(file);
-}
+/* ---------- 数据重置 ---------- */
 function resetData(){
-  if(!confirm('确定要清空全部数据吗？\n（选中的城市、清单、打卡记录都会删除，且无法恢复）')){
+  if(!confirm('确定要清空全部数据吗？\n（选中的城市、清单、打卡记录、行程进度都会删除，且无法恢复）')){
     return;
   }
   ls.remove('selectedCities');
   ls.remove('checklists');
+  ls.remove('checklistVer');
   ls.remove('visitedCities');
+  ls.remove('journeyCity');
   ls.remove('tripDate');
   ls.remove('daysPerCity');
   selectedCities = []; checklists = JSON.parse(JSON.stringify(DEFAULT_CHECKLISTS));
-  visitedCities = []; tripDate = ''; daysPerCity = 3;
+  visitedCities = []; journeyCity = ''; routeLocked = false; tripDate = ''; daysPerCity = 3;
   document.getElementById('tripDateInput').value = '';
   document.getElementById('daysPerCitySel').value = '3';
   renderCities(); renderTrip(); renderGuide(); renderVisa(); renderChecklist(); updateBudget();
