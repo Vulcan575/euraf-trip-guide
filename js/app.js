@@ -283,25 +283,54 @@ function addCheckItem(){
 function updateBudget(){
   const val = parseInt(document.getElementById('budgetSlider').value);
   document.getElementById('budgetValue').textContent = val;
+  const el = document.getElementById('budgetBreakdown');
   if(selectedCities.length===0){
-    document.getElementById('budgetBreakdown').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);"><p>选择城市后查看预算明细</p></div>';
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-light);"><p>选择城市后查看预算明细</p></div>';
     return;
   }
-  let total = 0, byRegion = {};
+  /* 基础预算 = 城市数 × 每城天数 × 日预算 */
+  const base = selectedCities.length*daysPerCity*val;
+  /* 交通预算：按地理路线相邻段计算，最后一段回到出发地（环线） */
+  const sorted = [...selectedCities].sort(byRoute);
+  let transportTotal = 0;
+  const transportRows = [];
+  for(let i=0;i<sorted.length;i++){
+    const from = cities[sorted[i]].r;
+    const to = (i+1<sorted.length) ? cities[sorted[i+1]].r : '出发地';
+    const cost = getTransportCost(from,to);
+    transportTotal += cost;
+    transportRows.push('<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">'+from+' → '+to+'</td><td style="padding:8px;text-align:right;">¥'+cost+'</td></tr>');
+  }
+  /* 大额体验（货币单位混合，只列清单不求和） */
+  const expCities = selectedCities.filter(n=>cities[n].x && cities[n].x.length);
+  const expHTML = expCities.length ? expCities.map(n=>{
+    return cities[n].x.map(x=>'<div style="padding:6px 0;border-bottom:1px dashed var(--border);font-size:0.9rem;"><span style="margin-right:6px;">🎈</span><b>'+n+' · '+x.n+'</b>：'+x.p+'</div>').join('');
+  }).join('') : '<p style="color:var(--text-light);font-size:0.85rem;">行程中没有大额体验项目</p>';
+  /* 区域分布 */
+  const byRegion = {};
   selectedCities.forEach(name=>{
     const c = cities[name];
-    total += val;
-    if(!byRegion[c.r]) byRegion[c.r] = {cities:0, budget:0};
+    if(!byRegion[c.r]) byRegion[c.r] = {cities:0};
     byRegion[c.r].cities++;
-    byRegion[c.r].budget += val;
   });
-  let html = '<div class="card"><h3>预算明细</h3><p style="font-size:1.1rem;margin-bottom:12px;">总预算: <strong style="color:var(--primary);">¥'+(total*3)+'</strong> (按'+selectedCities.length+'个城市×3天×¥'+val+'/天估算)</p>'
-    +'<table style="width:100%;border-collapse:collapse;"><tr style="background:var(--primary);color:white;"><th style="padding:10px;text-align:left;">区域</th><th style="padding:10px;text-align:left;">城市数</th><th style="padding:10px;text-align:left;">区域预算</th></tr>';
+  let regionHTML = '';
   for(let r in byRegion){
-    html += '<tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">'+r+'</td><td style="padding:10px;">'+byRegion[r].cities+'</td><td style="padding:10px;">¥'+(byRegion[r].budget*3)+'</td></tr>';
+    regionHTML += '<tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">'+r+'</td><td style="padding:8px;">'+byRegion[r].cities+'城</td><td style="padding:8px;text-align:right;">¥'+(byRegion[r].cities*val*daysPerCity)+'</td></tr>';
   }
-  html += '</table></div>';
-  document.getElementById('budgetBreakdown').innerHTML = html;
+  el.innerHTML = '<div class="card"><h3>预算明细</h3>'
+    +'<h4 style="margin:0 0 4px;">基础预算（食宿+市内交通）</h4>'
+    +'<p style="font-size:1.2rem;margin:0 0 4px;">¥<strong style="color:var(--primary);">'+base+'</strong></p>'
+    +'<p style="font-size:0.8rem;color:var(--text-light);margin:0 0 16px;">'+selectedCities.length+'城 × '+daysPerCity+'天 × ¥'+val+'/天</p>'
+    +'<h4 style="margin:0 0 4px;">城际交通（按路线估算）</h4>'
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:4px;">'+transportRows.join('')
+    +'<tr><td style="padding:8px;"><b>交通合计</b></td><td style="padding:8px;text-align:right;"><b style="color:var(--primary);">¥'+transportTotal+'</b></td></tr></table>'
+    +'<p style="font-size:0.8rem;color:var(--text-light);margin:0 0 16px;">区域间价格含巴士/火车/飞机的混合估算，实际以预订为准</p>'
+    +'<h4 style="margin:0 0 8px;">大额体验（可选，另计）</h4>'+expHTML
+    +'<h4 style="margin:16px 0 8px;">按区域分布（基础预算）</h4>'
+    +'<table style="width:100%;border-collapse:collapse;">'+regionHTML+'</table>'
+    +'<div style="margin-top:16px;background:linear-gradient(135deg,var(--primary),#f39c12);color:white;border-radius:12px;padding:16px;text-align:center;">'
+    +'<div style="font-size:0.85rem;opacity:0.9;">预估总预算（基础+交通，不含大额体验）</div>'
+    +'<div style="font-size:1.8rem;font-weight:700;">¥'+(base+transportTotal)+'</div></div></div>';
 }
 
 /* ---------- 数据导出 ---------- */
