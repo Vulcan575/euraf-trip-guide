@@ -170,6 +170,7 @@ function renderGuide(){
     const city = cities[name];
     let html = '<div class="city-detail" style="background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow);"><h2 style="color:var(--primary);">'+name+' <span style="font-size:0.9rem;color:var(--text-light);">'+city.c+'</span></h2>';
     html += '<span class="tag '+getVisaClass(city.v)+'">'+city.v+'</span><span class="tag" style="background:#e8f4f8;color:#0c5460;">¥'+city.b+'/天</span><span class="tag" style="background:#fff3cd;color:#856404;">🌤️ '+city.best+'</span>';
+    html += '<p style="font-size:0.95rem;line-height:1.7;color:var(--text);margin:10px 0 0;padding:10px 14px;background:var(--bg);border-left:4px solid var(--primary);border-radius:0 10px 10px 0;">'+(city.i||'')+'</p>';
     html += '<h3 style="margin-top:16px;">著名景点</h3><ul style="list-style:none;">';
     city.a.forEach(attr=>{
       const p = attr.split(':'); const n = p[0]; const d = p.slice(1).join(':');
