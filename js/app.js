@@ -68,6 +68,7 @@ function switchTab(tab){
   if(tab==='checklist') renderChecklist();
   if(tab==='budget') updateBudget();
   if(tab==='tips') renderTips();
+  if(tab==='gear') renderGear();
 }
 
 /* ---------- 工具 ---------- */
@@ -428,18 +429,6 @@ function renderChecklist(){
   container.innerHTML = blocks.join('');
 }
 function toggleCheck(cat,idx){
-  if(!checklists[cat] || !checklists[cat][idx]) return;
-  checklists[cat][idx].done = !checklists[cat][idx].done;
-  ls.set('checklists', JSON.stringify(checklists));
-  renderChecklist();
-}
-function deleteCheck(cat,idx){
-  if(!checklists[cat] || !checklists[cat][idx]) return;
-  checklists[cat].splice(idx,1);
-  ls.set('checklists', JSON.stringify(checklists));
-  renderChecklist();
-}
-function toggleCheck(cat,idx){
   checklists[cat][idx].done = !checklists[cat][idx].done;
   ls.set('checklists', JSON.stringify(checklists));
   renderChecklist();
@@ -648,6 +637,62 @@ function openTip(id){
       target.scrollIntoView({behavior:'smooth', block:'start'});
     }, 50);
   }
+}
+
+/* ---------- 装备推荐 ---------- */
+function renderGear(){
+  /* 打包心法 */
+  const rulesEl = document.getElementById('gearRules');
+  if(rulesEl){
+    rulesEl.innerHTML = GEAR.rules.map(function(r,i){
+      return '<div style="display:flex;gap:8px;align-items:flex-start;font-size:0.9rem;"><span style="background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;margin-top:2px;">'+(i+1)+'</span><span>'+r+'</span></div>';
+    }).join('');
+  }
+  /* 分类导航胶囊 */
+  const el = document.getElementById('gearContent');
+  let html = '<div class="tips-nav">';
+  GEAR.cats.forEach(function(c,i){
+    html += '<button class="tips-nav-btn" onclick="openGearTip(\'gear-cat-'+i+'\')">'+c.t+'</button>';
+  });
+  html += '</div>';
+  /* 分类折叠卡片 */
+  GEAR.cats.forEach(function(c,i){
+    html += '<details class="tip-card" id="gear-cat-'+i+'"'+(i===0?' open':'')+'><summary>'+c.t+'<span class="gear-count">'+c.items.length+'件</span><span class="tip-sum-hint">点击展开/收起</span></summary>';
+    c.items.forEach(function(it){
+      const badge = it.p===1 ? '<span class="gear-badge must">必带</span>' : '<span class="gear-badge opt">轻量</span>';
+      html += '<div class="gear-item"><div><b>'+it.n+'</b> '+badge+'<br><span style="font-size:0.85rem;color:var(--text-light);">'+it.d+'</span></div><button class="gear-add" onclick="addGearItem(\''+it.n.replace(/'/g,"\\'")+'\')" title="加入清单栏">➕</button></div>';
+    });
+    html += '</details>';
+  });
+  el.innerHTML = html;
+}
+
+/* 装备分类胶囊点击：展开目标 + 收起其他 + 平滑滚动 */
+function openGearTip(id){
+  const idx = parseInt(id.split('-')[2],10);
+  GEAR.cats.forEach(function(_,i){
+    const d = document.getElementById('gear-cat-'+i);
+    if(d){ d.open = (i===idx); }
+  });
+  const target = document.getElementById(id);
+  if(target){
+    setTimeout(function(){
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+    }, 50);
+  }
+}
+
+/* 一键加入清单栏（去重） */
+function addGearItem(name){
+  if(!checklists.gear) checklists.gear = [];
+  if(checklists.gear.some(function(it){ return it.text===name; })){
+    alert('「'+name+'」已在清单里啦 🎒');
+    return;
+  }
+  checklists.gear.push({text:name, done:false, note:''});
+  ls.set('checklists', JSON.stringify(checklists));
+  alert('已加入清单栏：'+name+' ✅ 去「清单栏」勾选打包');
+  renderChecklist();
 }
 
 /* ---------- Hero 背景轮播 ---------- */
