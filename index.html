@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-style="aurora">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>姐姐的亚欧非漫游指南</title>
+<title>亚欧非环线漫游指南</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
@@ -19,9 +19,16 @@
   <div class="cloud c2"></div>
   <div class="cloud c3"></div>
   <div class="hero-content">
-    <h1>姐姐的亚欧非漫游指南</h1>
+    <h1>亚欧非环线漫游指南</h1>
     <p>从新疆出发，穿越中亚、高加索、土耳其、巴尔干、欧洲、北非、中东</p>
-    <button id="themeToggle" onclick="toggleTheme()" title="切换深浅色">🌙</button>
+    <div style="position:absolute;top:14px;right:14px;display:flex;gap:8px;z-index:4;">
+      <button id="styleToggle" onclick="toggleStylePanel(event)" title="切换风格" style="background:var(--card);border:2px solid var(--ink);border-radius:50%;width:44px;height:44px;cursor:pointer;font-size:1.1rem;box-shadow:0 3px 0 rgba(92,74,61,0.25);transition:transform .2s;">🎨</button>
+      <button id="themeToggle" onclick="toggleTheme()" title="切换深浅色" style="background:var(--card);border:2px solid var(--ink);border-radius:50%;width:44px;height:44px;cursor:pointer;font-size:1.15rem;box-shadow:0 3px 0 rgba(92,74,61,0.25);transition:transform .2s;">🌙</button>
+      <div id="stylePanel" style="display:none;position:absolute;top:52px;right:0;background:var(--card);border:2px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:6px;min-width:170px;z-index:5;">
+        <button onclick="setStyle('ghibli')" data-s="ghibli" style="display:block;width:100%;text-align:left;padding:8px 12px;border:none;border-radius:10px;background:transparent;color:var(--text);font-size:0.88rem;font-weight:700;cursor:pointer;font-family:inherit;">🌿 吉卜力手账</button>
+        <button onclick="setStyle('aurora')" data-s="aurora" style="display:block;width:100%;text-align:left;padding:8px 12px;border:none;border-radius:10px;background:transparent;color:var(--text);font-size:0.88rem;font-weight:700;cursor:pointer;font-family:inherit;">✨ 极光北欧</button>
+      </div>
+    </div>
   </div>
 </header>
 <div class="tabs">

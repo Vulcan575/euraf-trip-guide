@@ -6,6 +6,6 @@ const DEFAULT_CHECKLISTS = {
   visa:[{text:"护照有效期>6个月",done:false,note:"必备"},{text:"土耳其电子签$60",done:false,note:"提前1周"},{text:"埃及落地签现金$25",done:false,note:"出发前"},{text:"肯尼亚/坦桑尼亚电子签",done:false,note:"safari前办"},{text:"南非签证材料提前备",done:false,note:"财产证明"},{text:"印度电子签",done:false,note:"提前1个月"}],
   gear:[{text:"65L背包+防雨罩",done:false,note:"必备"},{text:"头巾/围巾",done:false,note:"清真寺+防晒"},{text:"卫生巾/棉条",done:false,note:"偏远地区难买"},{text:"望远镜",done:false,note:"safari看动物"},{text:"轻薄羽绒服",done:false,note:"东非草原早晚冷"},{text:"抓绒睡袋内胆",done:false,note:"青旅+营地用"}],
   health:[{text:"肠胃药",done:false,note:"必备"},{text:"防晒霜SPF50+",done:false,note:"沙漠/高原"},{text:"高原反应药",done:false,note:"帕米尔/卡兹别克"},{text:"黄热病疫苗",done:false,note:"肯尼亚/坦桑尼亚入境要查"},{text:"疟疾药+驱蚊液",done:false,note:"东非/东南亚雨季"},{text:"创可贴+碘伏棉签",done:false,note:"徒步磨脚必备"}],
-  safety:[{text:"购买紧急救援保险",done:false,note:"含医疗转运"},{text:"天黑后乖乖回住处",done:false,note:"姐姐保命法则"},{text:"穿着端庄",done:false,note:"摩洛哥和埃及"},{text:"南非市区别夜行",done:false,note:"约翰内斯堡"},{text:"寺庙和清真寺拖鞋进场",done:false,note:"泰国/缅甸/中东"},{text:"随身复印护照首页",done:false,note:"原件锁酒店"}],
+  safety:[{text:"购买紧急救援保险",done:false,note:"含医疗转运"},{text:"天黑后乖乖回住处",done:false,note:"旅行保命法则"},{text:"穿着端庄",done:false,note:"摩洛哥和埃及"},{text:"南非市区别夜行",done:false,note:"约翰内斯堡"},{text:"寺庙和清真寺拖鞋进场",done:false,note:"泰国/缅甸/中东"},{text:"随身复印护照首页",done:false,note:"原件锁酒店"}],
   misc:[{text:"学几句俄语/土耳其语",done:false,note:"你好/谢谢/多少钱"},{text:"准备小额美元现金",done:false,note:"应急用"},{text:"下载离线地图",done:false,note:"中亚/非洲信号差"},{text:"装Uber/Grab",done:false,note:"东南亚打车"},{text:"换当地货币零钱",done:false,note:"付小费和厕所"}]
 };

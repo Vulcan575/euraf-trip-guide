@@ -1,4 +1,4 @@
-/* ===== 姐姐的亚欧非漫游指南 · 应用逻辑 ===== */
+/* ===== 亚欧非环线漫游指南 · 应用逻辑 ===== */
 /* 依赖：data-cities.js（cities）、data-checklist.js（DEFAULT_CHECKLISTS）先加载 */
 
 /* ---------- 工具 ---------- */
@@ -59,6 +59,26 @@ function setCityDays(name, days){
   ls.set('cityDays', JSON.stringify(cityDays));
   renderTrip();
   updateBudget();
+}
+/* 城市攻略用户补充笔记：{城市名:[{t:标题,c:内容,ts:时间}]}，存 localStorage */
+let cityNotes = {};
+try{ cityNotes = JSON.parse(ls.get('cityNotes') || '{}'); }catch(e){ cityNotes = {}; }
+function addCityNote(name){
+  const tEl = document.getElementById('noteT_'+name);
+  const cEl = document.getElementById('noteC_'+name);
+  const t = tEl ? tEl.value.trim() : '';
+  const c = cEl ? cEl.value.trim() : '';
+  if(!t && !c){ alert('先写点内容再添加吧'); return; }
+  if(!cityNotes[name]) cityNotes[name] = [];
+  cityNotes[name].push({t: t||'我的补充', c: c, ts: fmtDate(new Date())});
+  ls.set('cityNotes', JSON.stringify(cityNotes));
+  renderGuide();
+}
+function delCityNote(name, i){
+  cityNotes[name].splice(i, 1);
+  if(!cityNotes[name].length) delete cityNotes[name];
+  ls.set('cityNotes', JSON.stringify(cityNotes));
+  renderGuide();
 }
 
 /* ---------- 路线顺序（地理路线） ---------- */
@@ -226,12 +246,27 @@ function renderGuide(){
     if(city.x && city.x.length>0){
       html += '<h3>大额体验（另算预算）</h3>';
       city.x.forEach(x=>{
-        html += '<div style="background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#880e4f;margin-bottom:6px;">🎈 '+x.n+': <strong>'+x.p+'</strong></div>';
+        html += '<div style="background:var(--tint-pink-bg);border-radius:8px;padding:8px 12px;font-size:0.85rem;color:var(--tint-pink-text);margin-bottom:6px;">🎈 '+x.n+': <strong>'+x.p+'</strong></div>';
       });
     }
-    html += '<h3>青旅推荐</h3><div style="background:#fff8e1;border-radius:8px;padding:8px 12px;font-size:0.85rem;">'+city.h.join(' · ')+'</div>';
-    html += '<h3>必吃美食</h3><div style="background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:0.85rem;color:#880e4f;">'+city.f+'</div>';
-    html += '<h3>姐姐贴士</h3><div style="background:#fff3e0;border-radius:8px;padding:10px 14px;font-size:0.85rem;border-left:4px solid #f39c12;">'+city.tip+'</div></div>';
+    html += '<h3>青旅推荐</h3><div style="background:var(--tint-yellow-bg);border-radius:8px;padding:8px 12px;font-size:0.85rem;color:var(--tint-yellow-text);">'+city.h.join(' · ')+'</div>';
+    html += '<h3>必吃美食</h3><div style="background:var(--tint-pink-bg);border-radius:8px;padding:8px 12px;font-size:0.85rem;color:var(--tint-pink-text);">'+city.f+'</div>';
+    html += '<h3>旅行贴士</h3><div style="background:var(--tint-orange-bg);border-radius:8px;padding:10px 14px;font-size:0.85rem;border-left:4px solid var(--tint-orange-border);">'+city.tip+'</div>';
+    /* 用户自己的攻略补充 */
+    const notes = cityNotes[name] || [];
+    html += '<div class="city-notes"><h3>📝 我的攻略补充</h3>';
+    if(notes.length===0){
+      html += '<p style="font-size:0.8rem;color:var(--text-light);margin:0 0 6px;">记录你发现的私藏小店、踩坑经验、别人推荐…（只保存在本机浏览器）</p>';
+    }else{
+      notes.forEach(function(n,i){
+        html += '<div class="note-item"><strong>'+esc(n.t)+'</strong><span class="note-time">'+esc(n.ts)+'</span><p>'+esc(n.c)+'</p><button class="note-del" onclick="delCityNote(\''+name+'\','+i+')" title="删除这条">🗑️</button></div>';
+      });
+    }
+    html += '<div class="note-inputs">'
+      +'<input id="noteT_'+name+'" placeholder="标题（选填）" maxlength="40">'
+      +'<textarea id="noteC_'+name+'" rows="2" placeholder="补充信息：好吃的店、交通注意、青旅评价…"></textarea>'
+      +'<button class="btn small" onclick="addCityNote(\''+name+'\')">➕ 添加补充</button>'
+      +'</div></div></div>';
     return html;
   });
   container.innerHTML = parts.join('');
@@ -391,12 +426,12 @@ function sortTrip(){
 function shareTrip(){
   if(selectedCities.length===0){ alert('还没有选择城市，先去选城市吧！'); return; }
   const countries = [...new Set(selectedCities.map(n=>cities[n].c).filter(c=>c!=='中国'))].join('、');
-  let text = '🌸 姐姐的亚欧非漫游指南\n'
+  let text = '🌍 亚欧非环线漫游指南\n'
     +'路线：'+selectedCities.map((n,i)=>(i+1)+'. '+n+'（'+cities[n].c+'）').join(' → ')+'\n'
     +'共 '+selectedCities.length+' 城 · '+countries+' 国 · 全程约 '+totalDays()+' 天';
   if(tripDate) text += '\n出发：'+tripDate;
   if(visitedCities.length) text += '\n已打卡：'+visitedCities.join('、');
-  text += '\n—— 来自 姐姐的亚欧非漫游指南 🌍';
+  text += '\n—— 来自 亚欧非环线漫游指南 🌍';
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(()=>alert('✅ 行程已复制到剪贴板，去粘贴给朋友吧！'),()=>fallbackCopy(text));
   }else{
@@ -572,8 +607,9 @@ function resetData(){
   ls.remove('tripDate');
   ls.remove('daysPerCity');
   ls.remove('cityDays');
+  ls.remove('cityNotes');
   selectedCities = []; checklists = JSON.parse(JSON.stringify(DEFAULT_CHECKLISTS));
-  visitedCities = []; journeyCity = ''; routeLocked = false; tripDate = ''; daysPerCity = 3; cityDays = {};
+  visitedCities = []; journeyCity = ''; routeLocked = false; tripDate = ''; daysPerCity = 3; cityDays = {}; cityNotes = {};
   document.getElementById('tripDateInput').value = '';
   document.getElementById('daysPerCitySel').value = '3';
   renderCities(); renderTrip(); renderGuide(); renderVisa(); renderChecklist(); updateBudget();
@@ -602,7 +638,42 @@ function applyTheme(){
     root.setAttribute('data-theme','dark');
     document.getElementById('themeToggle').textContent = '☀️';
   }
+  /* 风格：默认极光北欧（index.html 已带 data-style="aurora"），保存过则恢复 */
+  const savedStyle = ls.get('style');
+  if(savedStyle==='ghibli' || savedStyle==='aurora'){
+    root.setAttribute('data-style', savedStyle);
+  }
+  highlightStylePanel();
 }
+
+/* ---------- 风格切换（极光北欧 / 吉卜力手账） ---------- */
+function toggleStylePanel(e){
+  if(e) e.stopPropagation();
+  const p = document.getElementById('stylePanel');
+  if(!p) return;
+  p.style.display = p.style.display==='block' ? 'none' : 'block';
+}
+function setStyle(s){
+  const root = document.documentElement;
+  root.setAttribute('data-style', s);
+  ls.set('style', s);
+  const p = document.getElementById('stylePanel');
+  if(p) p.style.display = 'none';
+  highlightStylePanel();
+}
+function highlightStylePanel(){
+  const cur = document.documentElement.getAttribute('data-style');
+  document.querySelectorAll('#stylePanel button[data-s]').forEach(b=>{
+    b.style.background = b.dataset.s===cur ? 'var(--chip-hover)' : 'transparent';
+  });
+}
+/* 点击面板外任意处自动收起 */
+document.addEventListener('click', function(e){
+  const p = document.getElementById('stylePanel');
+  if(p && p.style.display==='block' && !p.contains(e.target)){
+    p.style.display = 'none';
+  }
+});
 
 /* ---------- 行前贴士 ---------- */
 function renderTips(){
